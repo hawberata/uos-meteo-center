@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meteorological Center - University of Sulaimani</title>
     
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS (Starts in Light Mode by default) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -33,6 +33,7 @@
     <style>
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; transition: background-color 0.25s, color 0.25s; }
         .active-btn { background-color: #2563eb !important; color: #ffffff !important; border-color: #3b82f6 !important; }
+        .active-nav { background-color: #1e40af !important; color: #ffffff !important; box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3); }
         #miniMap { height: 250px; width: 100%; border-radius: 0.75rem; z-index: 10; }
         .leaflet-control-layers { font-size: 11px !important; color: #1e293b !important; border-radius: 8px !important; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -43,73 +44,71 @@
 <body class="bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col">
 
     <!-- ===================================================================== -->
-    <!-- TOP HEADER WITH UOS & COLLEGE OF SCIENCE EMBLEM                       -->
+    <!-- TOP HEADER WITH UOS LOGO & VIEW MODE SWITCHER                         -->
     <!-- ===================================================================== -->
     <header class="border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 sticky top-0 z-50 px-4 md:px-6 py-3.5 shadow-sm backdrop-blur">
-        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
+        <div class="max-w-7xl mx-auto flex flex-col xl:flex-row justify-between items-center gap-4">
             
-            <!-- Left: Logo & University Branding -->
+            <!-- Left: Logo (Loads uos-logo.png from GitHub automatically, falls back to SVG crest if missing) -->
             <div class="flex items-center gap-4">
-                <label for="logoUpload" title="Click to upload custom logo image" class="cursor-pointer group relative flex-shrink-0">
-                    <input type="file" id="logoUpload" accept="image/*" class="hidden" onchange="handleCustomLogo(event)">
-                    <div id="defaultLogoContainer" class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-900 to-slate-900 border-2 border-amber-500 flex items-center justify-center shadow-md overflow-hidden">
-                        <svg viewBox="0 0 100 100" class="w-12 h-12">
-                            <circle cx="50" cy="50" r="46" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="4,2"/>
-                            <polygon points="18,65 38,35 55,58 70,40 84,65" fill="#3b82f6" opacity="0.85"/>
-                            <circle cx="50" cy="30" r="8" fill="#fbbf24"/>
-                            <ellipse cx="50" cy="52" rx="28" ry="10" fill="none" stroke="#93c5fd" stroke-width="2" transform="rotate(-20 50 52)"/>
-                            <ellipse cx="50" cy="52" rx="28" ry="10" fill="none" stroke="#93c5fd" stroke-width="2" transform="rotate(20 50 52)"/>
-                            <path d="M25,70 Q50,78 75,70 L75,77 Q50,85 25,77 Z" fill="#f8fafc"/>
-                            <text x="50" y="93" font-size="9" font-weight="bold" fill="#fbbf24" text-anchor="middle" font-family="sans-serif">UOS • SCI</text>
-                        </svg>
-                    </div>
-                    <img id="customLogoImg" class="w-14 h-14 rounded-full object-cover border-2 border-amber-500 hidden" alt="UOS Logo" />
-                </label>
+                <div class="w-14 h-14 rounded-full bg-slate-900 border-2 border-amber-500 flex items-center justify-center shadow-md overflow-hidden flex-shrink-0">
+                    <img src="uos-logo.png" alt="University of Sulaimani Logo" class="w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('fallbackLogoSvg').style.display='block';">
+                    <svg id="fallbackLogoSvg" style="display:none;" viewBox="0 0 100 100" class="w-12 h-12">
+                        <circle cx="50" cy="50" r="46" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="4,2"/>
+                        <polygon points="18,65 38,35 55,58 70,40 84,65" fill="#3b82f6" opacity="0.85"/>
+                        <circle cx="50" cy="30" r="8" fill="#fbbf24"/>
+                        <ellipse cx="50" cy="52" rx="28" ry="10" fill="none" stroke="#93c5fd" stroke-width="2" transform="rotate(-20 50 52)"/>
+                        <ellipse cx="50" cy="52" rx="28" ry="10" fill="none" stroke="#93c5fd" stroke-width="2" transform="rotate(20 50 52)"/>
+                        <path d="M25,70 Q50,78 75,70 L75,77 Q50,85 25,77 Z" fill="#f8fafc"/>
+                        <text x="50" y="93" font-size="9" font-weight="bold" fill="#fbbf24" text-anchor="middle" font-family="sans-serif">UOS • SCI</text>
+                    </svg>
+                </div>
 
                 <div>
                     <div class="flex flex-wrap items-center gap-2">
-                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded">
+                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 rounded">
                             University of Sulaimani • College of Science
                         </span>
                         <span class="text-xs text-slate-400 hidden sm:inline">|</span>
-                        <span class="text-xs text-blue-600 dark:text-blue-400 font-medium">Dept. of Earth Sciences & Petroleum</span>
+                        <span class="text-xs text-blue-700 dark:text-blue-400 font-semibold">Dept. of Earth Sciences & Petroleum</span>
                     </div>
                     <h1 class="text-lg md:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white mt-0.5">
                         Meteorological Center — University of Sulaimani
                     </h1>
                     <p class="text-xs text-slate-500 dark:text-slate-400">
-                        High-Resolution Hydro-Meteorological Telemetry & Wind Rose Analytics • <span class="font-semibold text-slate-700 dark:text-slate-200">Developed by Hawber Ata</span>
+                        High-Resolution Hydro-Meteorological Telemetry & Multi-Year Analytics • <span class="font-semibold text-slate-700 dark:text-slate-200">Developed by Hawber Ata</span>
                     </p>
                 </div>
             </div>
 
-            <!-- Right: Status, Manage Stations, Theme Toggle, Excel & CSV Export -->
-            <div class="flex flex-wrap items-center gap-2">
+            <!-- Right: Mode Switcher, Status, Stations, Theme, Exports -->
+            <div class="flex flex-wrap items-center justify-center gap-2">
+                
+                <!-- MAIN MODE SWITCHER: LIVE DASHBOARD vs. COMPARE PERIODS/YEARS -->
+                <div class="flex bg-slate-200 dark:bg-slate-800 p-1 rounded-xl border border-slate-300 dark:border-slate-700 mr-1">
+                    <button onclick="switchMainView('dashboard')" id="nav-dashboard" class="active-nav px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-gauge-high"></i> Live Dashboard
+                    </button>
+                    <button onclick="switchMainView('compare')" id="nav-compare" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-300/60 dark:hover:bg-slate-700/60 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-scale-balanced text-indigo-500 dark:text-indigo-400"></i> Compare Years / Periods
+                    </button>
+                </div>
+
                 <span id="statusBadge" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Ready
                 </span>
 
                 <button onclick="toggleStationModal()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus-circle text-blue-500"></i> Stations
+                    <i class="fa-solid fa-plus-circle text-blue-600 dark:text-blue-400"></i> Stations
                 </button>
 
-                <button onclick="toggleTheme()" id="themeBtn" class="p-2 w-9 h-9 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-amber-400 rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center justify-center" title="Toggle Light/Dark Mode">
-                    <i id="themeIcon" class="fa-solid fa-sun"></i>
-                </button>
-
-                <!-- Multi-Sheet Excel (.xlsx) Export Button -->
-                <button onclick="exportToExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs md:text-sm font-bold rounded-lg shadow transition flex items-center gap-1.5" title="Export Excel Workbook with Separate Worksheet per Station">
-                    <i class="fa-solid fa-file-excel"></i> Export Excel (.xlsx)
-                </button>
-
-                <!-- Secondary CSV Export Button -->
-                <button onclick="exportToCSV()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5" title="Export Flat CSV">
-                    <i class="fa-solid fa-file-csv text-emerald-500"></i> CSV
+                <button onclick="toggleTheme()" id="themeBtn" class="p-2 w-9 h-9 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center justify-center" title="Toggle Light/Dark Mode">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Progress Bar for Multi-Day / Full-Year 5-Min & Hourly Scraping -->
+        <!-- Progress Bar for Multi-Day / Multi-Year Scraping -->
         <div id="progressWrapper" class="max-w-7xl mx-auto mt-2.5 hidden">
             <div class="flex justify-between text-xs font-medium text-blue-600 dark:text-blue-400 mb-1">
                 <span id="progressText">Downloading high-resolution telemetry...</span>
@@ -122,27 +121,27 @@
     </header>
 
     <!-- ===================================================================== -->
-    <!-- MAIN CONTENT CONTAINER                                                -->
+    <!-- VIEW 1: STANDARD TELEMETRY DASHBOARD                                  -->
     <!-- ===================================================================== -->
-    <main class="max-w-7xl mx-auto w-full px-4 md:px-6 py-5 flex-1 space-y-5">
+    <main id="dashboardView" class="max-w-7xl mx-auto w-full px-4 md:px-6 py-5 flex-1 space-y-5">
 
-        <!-- CONTROL PANEL: STATION, INTERVAL, AND DATE RANGE -->
+        <!-- CONTROL PANEL: STATION, INTERVAL (DEFAULT 1-HOUR), AND DATE RANGE -->
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm space-y-4">
             
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
                 <!-- Station Selector -->
                 <div class="lg:col-span-5">
                     <label class="block text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-1.5">
-                        <i class="fa-solid fa-tower-observation mr-1 text-blue-500"></i> Select Weather Station
+                        <i class="fa-solid fa-tower-observation mr-1 text-blue-600"></i> Select Weather Station
                     </label>
                     <select id="stationSelect" onchange="onStationChange()" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3.5 py-2 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-blue-500">
                     </select>
                 </div>
 
-                <!-- Data Interval / Time Resolution -->
+                <!-- Data Interval / Time Resolution (Starts on 1-Hour) -->
                 <div class="lg:col-span-7">
                     <label class="block text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-1.5">
-                        <i class="fa-solid fa-stopwatch mr-1 text-blue-500"></i> Sampling Interval (Works for Any Date Range)
+                        <i class="fa-solid fa-stopwatch mr-1 text-blue-600"></i> Sampling Interval (Works for Any Date Range)
                     </label>
                     <div class="grid grid-cols-5 gap-1.5">
                         <button onclick="setIntervalMode('5min')" id="int-5min" class="int-btn px-2.5 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 transition">5-Min</button>
@@ -154,7 +153,7 @@
                 </div>
             </div>
 
-            <!-- Date Pickers + Quick Presets -->
+            <!-- Date Pickers + Quick Presets + Export Buttons -->
             <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-end justify-between gap-3">
                 <div class="flex flex-wrap items-end gap-3">
                     <div>
@@ -167,6 +166,12 @@
                     </div>
                     <button onclick="loadWeatherData()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg shadow transition flex items-center gap-1.5">
                         <i class="fa-solid fa-bolt"></i> Fetch & Plot Data
+                    </button>
+                    <button onclick="exportToExcel()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs md:text-sm font-bold rounded-lg shadow transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-excel"></i> Export Excel (.xlsx)
+                    </button>
+                    <button onclick="exportToCSV()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1">
+                        <i class="fa-solid fa-file-csv text-emerald-600"></i> CSV
                     </button>
                 </div>
 
@@ -182,15 +187,13 @@
             </div>
         </div>
 
-        <!-- ===================================================================== -->
-        <!-- 8 METEOROLOGICAL SUMMARY KPI CARDS                                    -->
-        <!-- ===================================================================== -->
+        <!-- 8 METEOROLOGICAL SUMMARY KPI CARDS -->
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm">
                 <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex justify-between"><span>Temp (Avg)</span><i class="fa-solid fa-temperature-half text-orange-500"></i></div>
                 <div id="kpi-temp" class="text-xl font-extrabold mt-1">-- °C</div>
                 <div id="kpi-temp-minmax" class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-                    <span class="text-rose-500">H: --°</span> • <span class="text-cyan-500">L: --°</span>
+                    <span class="text-rose-500">H: --°</span> • <span class="text-cyan-600">L: --°</span>
                 </div>
             </div>
 
@@ -237,19 +240,15 @@
             </div>
         </div>
 
-        <!-- ===================================================================== -->
-        <!-- MAIN TIME-SERIES GRAPH + WIND ROSE (WITH PNG IMAGE EXPORT BUTTONS)    -->
-        <!-- ===================================================================== -->
+        <!-- MAIN TIME-SERIES GRAPH + WIND ROSE -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            
-            <!-- Left 8 Columns: Main Parameter Chart -->
             <div class="lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
                 <div class="flex flex-wrap justify-between items-center gap-3 mb-3">
                     <div>
                         <h2 class="text-base font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-chart-area text-blue-500"></i> Meteorological Parameter Time-Series
+                            <i class="fa-solid fa-chart-area text-blue-600"></i> Meteorological Parameter Time-Series
                         </h2>
-                        <p id="chartSubtitle" class="text-xs text-slate-500 dark:text-slate-400">High-resolution telemetry</p>
+                        <p id="chartSubtitle" class="text-xs text-slate-500 dark:text-slate-400">1-Hour interval telemetry</p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
@@ -266,8 +265,7 @@
                             <option value="solarRadiation">🔆 Solar Radiation (W/m²)</option>
                         </select>
 
-                        <!-- Export Time-Series Graph as PNG -->
-                        <button onclick="exportChartImage('weatherChart', 'TimeSeries_Graph')" class="px-3 py-1.5 bg-blue-600/15 hover:bg-blue-600/25 text-blue-600 dark:text-blue-400 border border-blue-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1.5" title="Download High-Resolution PNG of this Graph">
+                        <button onclick="exportChartImage('weatherChart', 'TimeSeries_Graph')" class="px-3 py-1.5 bg-blue-600/15 hover:bg-blue-600/25 text-blue-700 dark:text-blue-400 border border-blue-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
                             <i class="fa-solid fa-camera"></i> Save Graph PNG
                         </button>
                     </div>
@@ -278,15 +276,13 @@
                 </div>
             </div>
 
-            <!-- Right 4 Columns: Wind Rose Diagram -->
             <div class="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-base font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-compass text-teal-500"></i> Wind Rose Diagram
+                            <i class="fa-solid fa-compass text-teal-600"></i> Wind Rose Diagram
                         </h2>
-                        <!-- Export Wind Rose as PNG -->
-                        <button onclick="exportChartImage('windRoseChart', 'WindRose_Diagram')" class="px-2.5 py-1 bg-teal-600/15 hover:bg-teal-600/25 text-teal-600 dark:text-teal-400 border border-teal-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1" title="Download High-Resolution PNG of Wind Rose">
+                        <button onclick="exportChartImage('windRoseChart', 'WindRose_Diagram')" class="px-2.5 py-1 bg-teal-600/15 hover:bg-teal-600/25 text-teal-700 dark:text-teal-400 border border-teal-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
                             <i class="fa-solid fa-camera"></i> Save PNG
                         </button>
                     </div>
@@ -303,16 +299,12 @@
             </div>
         </div>
 
-        <!-- ===================================================================== -->
-        <!-- STATION LOCATION MAP & DATA LOG TABLE                                 -->
-        <!-- ===================================================================== -->
+        <!-- STATION LOCATION MAP & DATA LOG TABLE -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            
-            <!-- Left 4 Columns: Interactive Map -->
             <div class="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between space-y-3">
                 <div>
                     <h2 class="text-base font-bold flex items-center gap-2 mb-1">
-                        <i class="fa-solid fa-map-location-dot text-blue-500"></i> Station Network Map
+                        <i class="fa-solid fa-map-location-dot text-blue-600"></i> Station Network Map
                     </h2>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mb-2.5">Click any station marker to isolate its readings</p>
                     <div id="miniMap" class="border border-slate-300 dark:border-slate-700"></div>
@@ -326,11 +318,10 @@
                 </div>
             </div>
 
-            <!-- Right 8 Columns: Telemetry Data Table -->
             <div class="lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col">
                 <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
                     <h2 class="text-base font-bold flex items-center gap-2">
-                        <i class="fa-solid fa-table text-blue-500"></i> Complete Telemetry Log
+                        <i class="fa-solid fa-table text-blue-600"></i> Complete Telemetry Log
                     </h2>
                     <span class="text-xs text-slate-500 dark:text-slate-400">Showing latest 150 intervals (Click <b>Export Excel</b> for multi-sheet workbook)</span>
                 </div>
@@ -342,9 +333,9 @@
                                 <th class="p-2.5">Station</th>
                                 <th class="p-2.5">Temp Avg (°C)</th>
                                 <th class="p-2.5 text-rose-500">Temp High</th>
-                                <th class="p-2.5 text-cyan-500">Temp Low</th>
+                                <th class="p-2.5 text-cyan-600">Temp Low</th>
                                 <th class="p-2.5">Humidity (%)</th>
-                                <th class="p-2.5 text-blue-500">Precip (mm)</th>
+                                <th class="p-2.5 text-blue-600">Precip (mm)</th>
                                 <th class="p-2.5">Wind (km/h)</th>
                                 <th class="p-2.5">Gust (km/h)</th>
                                 <th class="p-2.5">Dir</th>
@@ -357,10 +348,236 @@
                     </table>
                 </div>
             </div>
+        </div>
+    </main>
 
+    <!-- ===================================================================== -->
+    <!-- VIEW 2: MULTI-YEAR & MULTI-PERIOD COMPARISON SUITE                    -->
+    <!-- ===================================================================== -->
+    <section id="comparisonView" class="max-w-7xl mx-auto w-full px-4 md:px-6 py-5 flex-1 space-y-5 hidden">
+
+        <!-- COMPARISON CONFIGURATION BAR -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+            <div class="flex flex-wrap justify-between items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+                <div>
+                    <h2 class="text-base md:text-lg font-extrabold flex items-center gap-2 text-slate-900 dark:text-white">
+                        <i class="fa-solid fa-layer-group text-indigo-600"></i> Multi-Period & Multi-Year Climatic Comparison Suite
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Compare 2 or 3 separate years, hydrological seasons, or custom date ranges across all parameters</p>
+                </div>
+
+                <!-- Quick Presets for 2 or 3 Years -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="applyYearPresets('calendar')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 transition">
+                        <i class="fa-solid fa-calendar-check mr-1"></i> Full Years (2026 vs 2025 vs 2024)
+                    </button>
+                    <button onclick="applyYearPresets('hydro')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30 transition">
+                        <i class="fa-solid fa-water mr-1"></i> Hydrological Seasons (Oct–May)
+                    </button>
+                    <button onclick="exportComparisonExcel()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-excel"></i> Export Comparison (.xlsx)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Station, Number of Periods (2 or 3), and Interval Controls -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                <div class="md:col-span-4">
+                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Station / Network</label>
+                    <select id="compStationSelect" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold">
+                    </select>
+                </div>
+
+                <div class="md:col-span-3">
+                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Number of Periods</label>
+                    <select id="compCountSelect" onchange="toggleThirdPeriodInput()" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold">
+                        <option value="2">Compare 2 Periods / Years</option>
+                        <option value="3" selected>Compare 3 Periods / Years</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-3">
+                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Comparison Interval</label>
+                    <select id="compIntervalSelect" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold">
+                        <option value="monthly">Monthly Aggregation</option>
+                        <option value="weekly">Weekly Aggregation</option>
+                        <option value="daily" selected>Daily Resolution</option>
+                        <option value="hourly">1-Hour Resolution (Short Ranges)</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2">
+                    <button onclick="runComparisonAnalysis()" class="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded-lg shadow transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-play"></i> Run Compare
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3 Period Date Range Selectors -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                <!-- Period 1 Input Box -->
+                <div class="p-3 rounded-xl bg-blue-500/5 border-2 border-blue-500/30 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-extrabold text-blue-600 dark:text-blue-400 uppercase flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span> Period 1 (Primary)
+                        </span>
+                        <input type="text" id="p1Label" value="2026" class="w-28 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-2 py-0.5 text-xs font-bold text-right" placeholder="Label">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-500">Start Date</label>
+                            <input type="date" id="p1Start" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500">End Date</label>
+                            <input type="date" id="p1End" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Period 2 Input Box -->
+                <div class="p-3 rounded-xl bg-amber-500/5 border-2 border-amber-500/30 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Period 2 (Reference)
+                        </span>
+                        <input type="text" id="p2Label" value="2025" class="w-28 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-2 py-0.5 text-xs font-bold text-right" placeholder="Label">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-500">Start Date</label>
+                            <input type="date" id="p2Start" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500">End Date</label>
+                            <input type="date" id="p2End" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Period 3 Input Box -->
+                <div id="p3InputBox" class="p-3 rounded-xl bg-emerald-500/5 border-2 border-emerald-500/30 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 uppercase flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Period 3 (Baseline)
+                        </span>
+                        <input type="text" id="p3Label" value="2024" class="w-28 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-2 py-0.5 text-xs font-bold text-right" placeholder="Label">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-500">Start Date</label>
+                            <input type="date" id="p3Start" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500">End Date</label>
+                            <input type="date" id="p3End" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-xs">
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-    </main>
+        <!-- ================================================================= -->
+        <!-- 3 GRAPHICAL SUMMARY TEXT BOXES WITH ICONS (ABOVE THE CHARTS)      -->
+        <!-- ================================================================= -->
+        <div id="compSummaryCardsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <!-- Dynamically populated by renderComparisonSummaryCards() -->
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- 3-PAGE VISUAL PRESENTATION & CHART TABS                           -->
+        <!-- ================================================================= -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+            
+            <!-- 3-Page Navigation Header -->
+            <div class="flex flex-wrap justify-between items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="switchCompPage(1)" id="comp-page-btn-1" class="comp-page-btn active-btn px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 transition flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line"></i> Page 1: Parameter Overlay Timeline
+                    </button>
+                    <button onclick="switchCompPage(2)" id="comp-page-btn-2" class="comp-page-btn px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 transition flex items-center gap-2">
+                        <i class="fa-solid fa-chart-column"></i> Page 2: Multi-Parameter Bar Comparison
+                    </button>
+                    <button onclick="switchCompPage(3)" id="comp-page-btn-3" class="comp-page-btn px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 transition flex items-center gap-2">
+                        <i class="fa-solid fa-table-list"></i> Page 3: Complete Parameter Matrix & Deltas
+                    </button>
+                </div>
+
+                <!-- Parameter Selector & PNG Save for Page 1 -->
+                <div id="compPage1Controls" class="flex flex-wrap items-center gap-2">
+                    <label class="text-xs font-bold text-slate-500">Parameter:</label>
+                    <select id="compParamSelect" onchange="renderComparisonCharts()" class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-bold">
+                        <option value="temp">🌡️ Average Temperature (°C)</option>
+                        <option value="tempHigh">🔥 Maximum Temperature (°C)</option>
+                        <option value="tempLow">❄️ Minimum Temperature (°C)</option>
+                        <option value="precipTotal">🌧️ Precipitation (mm)</option>
+                        <option value="humidity">💦 Relative Humidity (%)</option>
+                        <option value="dewpt">💧 Dew Point (°C)</option>
+                        <option value="windSpeed">🌬️ Mean Wind Speed (km/h)</option>
+                        <option value="windGust">💨 Max Wind Gust (km/h)</option>
+                        <option value="pressure">⏲️ Barometric Pressure (hPa)</option>
+                        <option value="uv">☀️ Max UV Index</option>
+                        <option value="solarRadiation">🔆 Peak Solar Radiation (W/m²)</option>
+                    </select>
+                    <button onclick="exportChartImage('compOverlayChart', 'Comparison_Timeline')" class="px-3 py-1.5 bg-blue-600/15 hover:bg-blue-600/25 text-blue-700 dark:text-blue-400 border border-blue-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-camera"></i> Save PNG
+                    </button>
+                </div>
+            </div>
+
+            <!-- PAGE 1: SYNCHRONIZED TIMELINE OVERLAY CHART -->
+            <div id="compPage1" class="space-y-2">
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Synchronized timeline comparing your selected parameter across Period 1 (Blue), Period 2 (Amber), and Period 3 (Emerald).
+                </p>
+                <div class="relative w-full h-[400px]">
+                    <canvas id="compOverlayChart"></canvas>
+                </div>
+            </div>
+
+            <!-- PAGE 2: MULTI-PARAMETER GROUPED BAR CHARTS (DIFFERENT COLORS PER PARAMETER) -->
+            <div id="compPage2" class="hidden space-y-4">
+                <div class="flex justify-between items-center">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        Visual comparison of all key extremes and averages side-by-side with distinct color coding per parameter.
+                    </p>
+                    <button onclick="exportChartImage('compBarChartLeft', 'Comparison_Parameters_Bar')" class="px-3 py-1 bg-indigo-600/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/30 rounded-lg text-xs font-bold">
+                        <i class="fa-solid fa-camera mr-1"></i> Save Bar Chart PNG
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Thermal & Wind Extremes (°C / km/h)</h4>
+                        <div class="relative w-full h-[320px]">
+                            <canvas id="compBarChartLeft"></canvas>
+                        </div>
+                    </div>
+                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Hydrology, Humidity & UV Metrics</h4>
+                        <div class="relative w-full h-[320px]">
+                            <canvas id="compBarChartRight"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 3: FULL PARAMETER COMPARISON TABLE -->
+            <div id="compPage3" class="hidden space-y-3">
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Complete statistical breakdown across all weather station sensors, including net difference ($\Delta$) between Period 1 and Period 2.
+                </p>
+                <div class="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead id="compTableHead" class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+                        </thead>
+                        <tbody id="compTableBody" class="divide-y divide-slate-200 dark:divide-slate-800">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </section>
 
     <!-- ===================================================================== -->
     <!-- MODAL: ADD / MANAGE CUSTOM WEATHER STATIONS                           -->
@@ -369,7 +586,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
                 <h3 class="text-base font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-tower-cell text-blue-500"></i> Manage Weather Stations
+                    <i class="fa-solid fa-tower-cell text-blue-600"></i> Manage Weather Stations
                 </h3>
                 <button onclick="toggleStationModal()" class="text-slate-400 hover:text-rose-500 text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -401,16 +618,17 @@
     <!-- ===================================================================== -->
     <script>
         const WU_API_KEY = "e1f10a1e78da46f5b10a1e78da96f525";
-        const PALETTE = ["#3b82f6", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6", "#06b6d4", "#ef4444", "#84cc16"];
+        const PALETTE = ["#2563eb", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6", "#06b6d4", "#ef4444", "#84cc16"];
 
         const DEFAULT_STATIONS = [
-            { id: "IKANIS1",   name: "Hawber Station",   lat: 35.55, lon: 45.48, color: "#3b82f6" },
+            { id: "IKANIS1",   name: "Hawber Station",   lat: 35.55, lon: 45.48, color: "#2563eb" },
             { id: "IQALIA1",   name: "UOS - New Campus", lat: 35.58, lon: 45.37, color: "#10b981" },
             { id: "I90583621", name: "UOS - Bakrajo",    lat: 35.54, lon: 45.36, color: "#f59e0b" },
             { id: "I90583618", name: "UOS - Old Campus", lat: 35.57, lon: 45.44, color: "#ec4899" }
         ];
 
         let STATIONS = JSON.parse(localStorage.getItem("uos_stations")) || DEFAULT_STATIONS;
+        // Default interval set to 1-Hour ("hourly")
         let currentInterval = "hourly";
         let globalDataset = [];
         let chartInstance = null;
@@ -418,11 +636,42 @@
         let mapInstance = null;
         let markerLayer = null;
 
+        // Comparison Suite State
+        let compResults = [];
+        let compOverlayChartInst = null;
+        let compBarLeftInst = null;
+        let compBarRightInst = null;
+
         window.addEventListener("DOMContentLoaded", () => {
             populateStationDropdown();
             initMap();
+            applyYearPresets('calendar', false);
             setQuickRange(0);
         });
+
+        // Switch between Live Dashboard and Multi-Period Comparison Suite
+        function switchMainView(view) {
+            const dash = document.getElementById("dashboardView");
+            const comp = document.getElementById("comparisonView");
+            const btnDash = document.getElementById("nav-dashboard");
+            const btnComp = document.getElementById("nav-compare");
+
+            if (view === "compare") {
+                dash.classList.add("hidden");
+                comp.classList.remove("hidden");
+                btnDash.classList.remove("active-nav");
+                btnComp.classList.add("active-nav");
+                if (compResults.length === 0) {
+                    runComparisonAnalysis();
+                }
+            } else {
+                comp.classList.add("hidden");
+                dash.classList.remove("hidden");
+                btnComp.classList.remove("active-nav");
+                btnDash.classList.add("active-nav");
+                setTimeout(() => mapInstance.invalidateSize(), 150);
+            }
+        }
 
         function toggleTheme() {
             const html = document.documentElement;
@@ -436,19 +685,7 @@
             }
             updateChart();
             updateWindRose();
-        }
-
-        function handleCustomLogo(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById("defaultLogoContainer").classList.add("hidden");
-                const img = document.getElementById("customLogoImg");
-                img.src = e.target.result;
-                img.classList.remove("hidden");
-            };
-            reader.readAsDataURL(file);
+            if (compResults.length > 0) renderComparisonCharts();
         }
 
         // ============================================================================
@@ -456,23 +693,28 @@
         // ============================================================================
         function populateStationDropdown() {
             const sel = document.getElementById("stationSelect");
+            const compSel = document.getElementById("compStationSelect");
             const currentVal = sel.value || STATIONS[0].id;
             sel.innerHTML = "";
+            compSel.innerHTML = "";
 
             STATIONS.forEach(st => {
                 const opt = document.createElement("option");
                 opt.value = st.id;
                 opt.textContent = `${st.name} (${st.id})`;
                 sel.appendChild(opt);
+                compSel.appendChild(opt.cloneNode(true));
             });
 
             const allOpt = document.createElement("option");
             allOpt.value = "ALL";
-            allOpt.textContent = `📊 Compare All ${STATIONS.length} Stations (Areal Mean)`;
+            allOpt.textContent = `📊 All ${STATIONS.length} Stations (Areal Mean)`;
             sel.appendChild(allOpt);
+            compSel.appendChild(allOpt.cloneNode(true));
 
             if ([...sel.options].some(o => o.value === currentVal)) {
                 sel.value = currentVal;
+                compSel.value = currentVal;
             }
             renderModalStationList();
         }
@@ -540,7 +782,7 @@
         }
 
         // ============================================================================
-        // LEAFLET MAP (ESRI ARCGIS TILES - NEVER BLOCKS LOCAL FILES OR REQUIRES API KEY)
+        // LEAFLET MAP (ESRI ARCGIS TILES)
         // ============================================================================
         function initMap() {
             mapInstance = L.map('miniMap').setView([35.56, 45.41], 11);
@@ -548,11 +790,9 @@
             const esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
                 attribution: 'Tiles &copy; Esri'
             });
-
             const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 attribution: 'Tiles &copy; Esri'
             });
-
             const esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
                 attribution: 'Tiles &copy; Esri'
             });
@@ -597,6 +837,7 @@
             currentInterval = mode;
             document.querySelectorAll(".int-btn").forEach(b => b.classList.remove("active-btn"));
             document.getElementById(`int-${mode}`).classList.add("active-btn");
+            document.getElementById("chartSubtitle").textContent = `Showing ${mode.toUpperCase()} interval telemetry`;
             loadWeatherData();
         }
 
@@ -608,7 +849,7 @@
             document.getElementById("endDate").value = end.toISOString().split('T')[0];
             document.getElementById("startDate").value = start.toISOString().split('T')[0];
 
-            if (daysBack >= 180 && currentInterval === "5min") {
+            if (daysBack >= 180 && (currentInterval === "5min" || currentInterval === "hourly")) {
                 setIntervalMode("daily");
             } else {
                 loadWeatherData();
@@ -635,7 +876,7 @@
         }
 
         // ============================================================================
-        // DATA FETCH ENGINE
+        // UNIVERSAL DATA FETCH ENGINE (USED BY BOTH DASHBOARD & COMPARISON SUITE)
         // ============================================================================
         function getDaysList(startStr, endStr) {
             const list = [];
@@ -673,12 +914,10 @@
             return null;
         }
 
-        async function fetchStationData(stationId, stationName, onProgress) {
-            const startVal = document.getElementById("startDate").value;
-            const endVal = document.getElementById("endDate").value;
+        async function fetchStationRangeData(stationId, stationName, startVal, endVal, intervalMode, onProgress) {
             let rawObs = [];
 
-            if (currentInterval === "5min" || currentInterval === "hourly") {
+            if (intervalMode === "5min" || intervalMode === "hourly") {
                 const days = getDaysList(startVal, endVal);
                 const batchSize = 6;
                 for (let i = 0; i < days.length; i += batchSize) {
@@ -724,7 +963,7 @@
                 const cumPrecip = firstNum(m.precipTotal, 0);
                 let intervalPrecip = cumPrecip;
 
-                if (currentInterval === "5min" || currentInterval === "hourly") {
+                if (intervalMode === "5min" || intervalMode === "hourly") {
                     if (dayPart !== prevDay) {
                         intervalPrecip = cumPrecip;
                         prevDay = dayPart;
@@ -756,9 +995,9 @@
                 };
             });
 
-            if (currentInterval === "hourly") return aggregateRecords(normalized, "hour");
-            if (currentInterval === "weekly") return aggregateRecords(normalized, "week");
-            if (currentInterval === "monthly") return aggregateRecords(normalized, "month");
+            if (intervalMode === "hourly") return aggregateRecords(normalized, "hour");
+            if (intervalMode === "weekly") return aggregateRecords(normalized, "week");
+            if (intervalMode === "monthly") return aggregateRecords(normalized, "month");
             return normalized;
         }
 
@@ -834,12 +1073,14 @@
             progBar.style.width = "5%";
 
             const selected = document.getElementById("stationSelect").value;
+            const startVal = document.getElementById("startDate").value;
+            const endVal = document.getElementById("endDate").value;
             globalDataset = [];
 
             if (selected === "ALL") {
                 let completedStations = 0;
                 const promises = STATIONS.map(async (st) => {
-                    const data = await fetchStationData(st.id, st.name, (done, total) => {
+                    const data = await fetchStationRangeData(st.id, st.name, startVal, endVal, currentInterval, (done, total) => {
                         const pct = Math.round(((completedStations + (done / total)) / STATIONS.length) * 100);
                         progBar.style.width = `${pct}%`;
                         progPct.textContent = `${pct}%`;
@@ -852,7 +1093,7 @@
                 results.forEach(arr => globalDataset = globalDataset.concat(arr));
             } else {
                 const st = STATIONS.find(s => s.id === selected) || STATIONS[0];
-                globalDataset = await fetchStationData(st.id, st.name, (done, total) => {
+                globalDataset = await fetchStationRangeData(st.id, st.name, startVal, endVal, currentInterval, (done, total) => {
                     const pct = Math.round((done / total) * 100);
                     progBar.style.width = `${pct}%`;
                     progPct.textContent = `${pct}%`;
@@ -876,7 +1117,7 @@
         }
 
         // ============================================================================
-        // KPI CARDS & CHARTS
+        // DASHBOARD KPI CARDS & CHARTS
         // ============================================================================
         function degToCompass(num) {
             if (num === null || isNaN(num)) return "--";
@@ -912,7 +1153,7 @@
             document.getElementById("kpi-temp").textContent = avgTemp !== null ? `${avgTemp.toFixed(1)} °C` : "-- °C";
             document.getElementById("kpi-temp-minmax").innerHTML = `
                 <span class="text-rose-500">Max: ${maxTemp !== null ? maxTemp.toFixed(1) : '--'}°</span> • 
-                <span class="text-cyan-500">Min: ${minTemp !== null ? minTemp.toFixed(1) : '--'}°</span>
+                <span class="text-cyan-600">Min: ${minTemp !== null ? minTemp.toFixed(1) : '--'}°</span>
             `;
 
             const avgDew = mean(dews);
@@ -1026,7 +1267,7 @@
                         label: `${st.name} (${param})`,
                         data: globalDataset.map(d => d[param]),
                         borderColor: st.color,
-                        backgroundColor: isBar ? "#3b82f6" : st.color + "25",
+                        backgroundColor: isBar ? "#2563eb" : st.color + "25",
                         borderWidth: 2,
                         pointRadius: labels.length > 80 ? 0 : 2.5,
                         tension: 0.25,
@@ -1058,14 +1299,8 @@
                         legend: { labels: { color: textColor, font: { size: 11, weight: 'bold' } } }
                     },
                     scales: {
-                        x: {
-                            ticks: { color: textColor, maxTicksLimit: 10, font: { size: 10 } },
-                            grid: { color: gridColor }
-                        },
-                        y: {
-                            ticks: { color: textColor, font: { size: 11 } },
-                            grid: { color: gridColor }
-                        }
+                        x: { ticks: { color: textColor, maxTicksLimit: 10, font: { size: 10 } }, grid: { color: gridColor } },
+                        y: { ticks: { color: textColor, font: { size: 11 } }, grid: { color: gridColor } }
                     }
                 }
             });
@@ -1153,7 +1388,7 @@
                     <td class="p-2.5 font-bold">${r.stationName}</td>
                     <td class="p-2.5 font-semibold">${r.temp ?? '--'}</td>
                     <td class="p-2.5 text-rose-500">${r.tempHigh ?? '--'}</td>
-                    <td class="p-2.5 text-cyan-500">${r.tempLow ?? '--'}</td>
+                    <td class="p-2.5 text-cyan-600">${r.tempLow ?? '--'}</td>
                     <td class="p-2.5">${r.humidity ?? '--'}</td>
                     <td class="p-2.5 text-blue-600 dark:text-blue-400 font-bold">${r.precipTotal ?? '0'}</td>
                     <td class="p-2.5">${r.windSpeed ?? '--'}</td>
@@ -1164,6 +1399,545 @@
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        // ============================================================================
+        // MULTI-YEAR & MULTI-PERIOD COMPARISON ENGINE
+        // ============================================================================
+        function toggleThirdPeriodInput() {
+            const count = document.getElementById("compCountSelect").value;
+            const p3Box = document.getElementById("p3InputBox");
+            if (count === "2") {
+                p3Box.classList.add("opacity-40", "pointer-events-none");
+            } else {
+                p3Box.classList.remove("opacity-40", "pointer-events-none");
+            }
+        }
+
+        function applyYearPresets(type, autoRun = true) {
+            const today = new Date().toISOString().split('T')[0];
+            if (type === "calendar") {
+                document.getElementById("p1Label").value = "Year 2026";
+                document.getElementById("p1Start").value = "2026-01-01";
+                document.getElementById("p1End").value = today;
+
+                document.getElementById("p2Label").value = "Year 2025";
+                document.getElementById("p2Start").value = "2025-01-01";
+                document.getElementById("p2End").value = "2025-12-31";
+
+                document.getElementById("p3Label").value = "Year 2024";
+                document.getElementById("p3Start").value = "2024-01-01";
+                document.getElementById("p3End").value = "2024-12-31";
+                document.getElementById("compIntervalSelect").value = "monthly";
+            } else if (type === "hydro") {
+                document.getElementById("p1Label").value = "Hydro 2025–2026";
+                document.getElementById("p1Start").value = "2025-10-01";
+                document.getElementById("p1End").value = "2026-05-31";
+
+                document.getElementById("p2Label").value = "Hydro 2024–2025";
+                document.getElementById("p2Start").value = "2024-10-01";
+                document.getElementById("p2End").value = "2025-05-31";
+
+                document.getElementById("p3Label").value = "Hydro 2023–2024";
+                document.getElementById("p3Start").value = "2023-10-01";
+                document.getElementById("p3End").value = "2024-05-31";
+                document.getElementById("compIntervalSelect").value = "monthly";
+            }
+            if (autoRun) runComparisonAnalysis();
+        }
+
+        function computePeriodSummary(records, isAllStations) {
+            const valid = (p) => records.map(r => r[p]).filter(v => v !== null && !isNaN(v));
+            const mean = (arr) => arr.length ? Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2)) : null;
+            const max = (arr) => arr.length ? Number(Math.max(...arr).toFixed(2)) : null;
+            const min = (arr) => arr.length ? Number(Math.min(...arr).toFixed(2)) : null;
+
+            // Calculate total precipitation (Areal mean if ALL stations selected)
+            const stMap = {};
+            records.forEach(r => {
+                if (!stMap[r.stationId]) stMap[r.stationId] = 0;
+                stMap[r.stationId] += (r.precipTotal || 0);
+            });
+            const activeStCount = Object.keys(stMap).length || 1;
+            const rawSumPrecip = Object.values(stMap).reduce((a, b) => a + b, 0);
+            const totalPrecip = isAllStations ? Number((rawSumPrecip / activeStCount).toFixed(2)) : Number(rawSumPrecip.toFixed(2));
+
+            // If ALL stations selected, collapse timestamps to areal average series for clean timeline plotting
+            let series = records;
+            if (isAllStations && records.length > 0) {
+                const byTime = {};
+                records.forEach(r => {
+                    if (!byTime[r.timeLocal]) byTime[r.timeLocal] = [];
+                    byTime[r.timeLocal].push(r);
+                });
+                series = Object.keys(byTime).sort().map(t => {
+                    const group = byTime[t];
+                    const gValid = (p) => group.map(x => x[p]).filter(v => v !== null && !isNaN(v));
+                    const gMean = (p) => { const a = gValid(p); return a.length ? Number((a.reduce((x,y)=>x+y,0)/a.length).toFixed(2)) : null; };
+                    const gMax = (p) => { const a = gValid(p); return a.length ? Number(Math.max(...a).toFixed(2)) : null; };
+                    const gMin = (p) => { const a = gValid(p); return a.length ? Number(Math.min(...a).toFixed(2)) : null; };
+                    return {
+                        timeLocal: t,
+                        temp: gMean("temp"),
+                        tempHigh: gMax("tempHigh"),
+                        tempLow: gMin("tempLow"),
+                        precipTotal: gMean("precipTotal"),
+                        humidity: gMean("humidity"),
+                        dewpt: gMean("dewpt"),
+                        windSpeed: gMean("windSpeed"),
+                        windGust: gMax("windGust"),
+                        winddir: gMean("winddir"),
+                        pressure: gMean("pressure"),
+                        uv: gMax("uv"),
+                        solarRadiation: gMax("solarRadiation")
+                    };
+                });
+            }
+
+            const avgDir = mean(valid("winddir"));
+
+            return {
+                count: records.length,
+                tempAvg: mean(valid("temp")),
+                tempMax: max(valid("tempHigh")),
+                tempMin: min(valid("tempLow")),
+                dewAvg: mean(valid("dewpt")),
+                dewMax: max(valid("dewpt")),
+                humAvg: mean(valid("humidity")),
+                humMax: max(valid("humidity")),
+                humMin: min(valid("humidity")),
+                precipTotal: totalPrecip,
+                precipMaxInterval: max(series.map(s => s.precipTotal).filter(v => v !== null)),
+                windAvg: mean(valid("windSpeed")),
+                windMaxGust: max(valid("windGust")),
+                windDirAvg: avgDir,
+                windSector: degToCompass(avgDir),
+                pressAvg: mean(valid("pressure")),
+                pressMax: max(valid("pressure")),
+                pressMin: min(valid("pressure")),
+                uvMax: max(valid("uv")),
+                solarMax: max(valid("solarRadiation")),
+                series
+            };
+        }
+
+        async function runComparisonAnalysis() {
+            const count = parseInt(document.getElementById("compCountSelect").value, 10);
+            const selectedSt = document.getElementById("compStationSelect").value;
+            const intervalMode = document.getElementById("compIntervalSelect").value;
+
+            const periodsConfig = [
+                {
+                    label: document.getElementById("p1Label").value || "Period 1",
+                    start: document.getElementById("p1Start").value,
+                    end: document.getElementById("p1End").value,
+                    color: "#2563eb",
+                    bgLight: "bg-blue-500/10",
+                    borderCol: "border-blue-500/40",
+                    textCol: "text-blue-600 dark:text-blue-400"
+                },
+                {
+                    label: document.getElementById("p2Label").value || "Period 2",
+                    start: document.getElementById("p2Start").value,
+                    end: document.getElementById("p2End").value,
+                    color: "#f59e0b",
+                    bgLight: "bg-amber-500/10",
+                    borderCol: "border-amber-500/40",
+                    textCol: "text-amber-600 dark:text-amber-400"
+                }
+            ];
+
+            if (count === 3) {
+                periodsConfig.push({
+                    label: document.getElementById("p3Label").value || "Period 3",
+                    start: document.getElementById("p3Start").value,
+                    end: document.getElementById("p3End").value,
+                    color: "#10b981",
+                    bgLight: "bg-emerald-500/10",
+                    borderCol: "border-emerald-500/40",
+                    textCol: "text-emerald-600 dark:text-emerald-400"
+                });
+            }
+
+            const progWrap = document.getElementById("progressWrapper");
+            const progBar = document.getElementById("progressBar");
+            const progText = document.getElementById("progressText");
+            const progPct = document.getElementById("progressPercent");
+
+            progWrap.classList.remove("hidden");
+            progBar.style.width = "5%";
+
+            compResults = [];
+
+            for (let i = 0; i < periodsConfig.length; i++) {
+                const p = periodsConfig[i];
+                let periodRecords = [];
+
+                if (selectedSt === "ALL") {
+                    const promises = STATIONS.map(st => fetchStationRangeData(st.id, st.name, p.start, p.end, intervalMode));
+                    const resArr = await Promise.all(promises);
+                    resArr.forEach(a => periodRecords = periodRecords.concat(a));
+                } else {
+                    const st = STATIONS.find(s => s.id === selectedSt) || STATIONS[0];
+                    periodRecords = await fetchStationRangeData(st.id, st.name, p.start, p.end, intervalMode, (done, total) => {
+                        const pct = Math.round(((i + (done / total)) / periodsConfig.length) * 100);
+                        progBar.style.width = `${pct}%`;
+                        progPct.textContent = `${pct}%`;
+                        progText.textContent = `Comparing ${p.label}: Fetching (${done}/${total})...`;
+                    });
+                }
+
+                const summary = computePeriodSummary(periodRecords, selectedSt === "ALL");
+                compResults.push({ ...p, summary });
+            }
+
+            setTimeout(() => progWrap.classList.add("hidden"), 400);
+
+            renderComparisonSummaryCards();
+            renderComparisonCharts();
+            renderComparisonMatrixTable();
+        }
+
+        // Render the 3 Graphical Summary Cards above the Comparison Chart
+        function renderComparisonSummaryCards() {
+            const container = document.getElementById("compSummaryCardsGrid");
+            container.innerHTML = "";
+            container.className = compResults.length === 2
+                ? "grid grid-cols-1 md:grid-cols-2 gap-5"
+                : "grid grid-cols-1 md:grid-cols-3 gap-5";
+
+            compResults.forEach((p, idx) => {
+                const s = p.summary;
+                const card = document.createElement("div");
+                card.className = `bg-white dark:bg-slate-900 border-2 ${p.borderCol} rounded-2xl p-5 shadow-sm space-y-4`;
+                card.innerHTML = `
+                    <!-- Card Header -->
+                    <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-800 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl ${p.bgLight} ${p.textCol} flex items-center justify-center text-lg font-extrabold">
+                                P${idx + 1}
+                            </div>
+                            <div>
+                                <h3 class="text-base font-extrabold text-slate-900 dark:text-white">${p.label}</h3>
+                                <p class="text-[11px] font-mono text-slate-500 dark:text-slate-400">${p.start} → ${p.end}</p>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${p.bgLight} ${p.textCol}">
+                            ${s.count.toLocaleString()} pts
+                        </span>
+                    </div>
+
+                    <!-- Graphical Icon Metrics Grid inside the Box -->
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <!-- Temperature Block -->
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 flex items-start gap-2.5">
+                            <i class="fa-solid fa-temperature-three-quarters text-orange-500 text-lg mt-0.5"></i>
+                            <div>
+                                <div class="text-[11px] text-slate-500 font-semibold">Temperature</div>
+                                <div class="text-sm font-extrabold">Avg: ${s.tempAvg ?? '--'} °C</div>
+                                <div class="text-[11px] mt-0.5">
+                                    <span class="text-rose-500 font-bold">Max: ${s.tempMax ?? '--'}°</span> •
+                                    <span class="text-cyan-600 font-bold">Min: ${s.tempMin ?? '--'}°</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Precipitation Block -->
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 flex items-start gap-2.5">
+                            <i class="fa-solid fa-cloud-showers-water text-blue-500 text-lg mt-0.5"></i>
+                            <div>
+                                <div class="text-[11px] text-slate-500 font-semibold">Precipitation</div>
+                                <div class="text-sm font-extrabold text-blue-600 dark:text-blue-400">Total: ${s.precipTotal ?? 0} mm</div>
+                                <div class="text-[11px] text-slate-500 mt-0.5">Max Peak: <b>${s.precipMaxInterval ?? 0} mm</b></div>
+                            </div>
+                        </div>
+
+                        <!-- Wind & Gust Block -->
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 flex items-start gap-2.5">
+                            <i class="fa-solid fa-wind text-teal-500 text-lg mt-0.5"></i>
+                            <div>
+                                <div class="text-[11px] text-slate-500 font-semibold">Wind & Direction</div>
+                                <div class="text-sm font-extrabold">Mean: ${s.windAvg ?? '--'} km/h</div>
+                                <div class="text-[11px] text-rose-500 font-semibold mt-0.5">Max Gust: ${s.windMaxGust ?? '--'} km/h (${s.windSector})</div>
+                            </div>
+                        </div>
+
+                        <!-- Humidity, Pressure & UV Block -->
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 flex items-start gap-2.5">
+                            <i class="fa-solid fa-sun-plant-wilt text-amber-500 text-lg mt-0.5"></i>
+                            <div>
+                                <div class="text-[11px] text-slate-500 font-semibold">Humidity / UV / Solar</div>
+                                <div class="text-sm font-extrabold">RH: ${s.humAvg ?? '--'}% | UV: ${s.uvMax ?? '--'}</div>
+                                <div class="text-[11px] text-slate-500 mt-0.5">${s.pressAvg ?? '--'} hPa • ${s.solarMax ?? '--'} W/m²</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Switch between the 3 Visual Presentation Pages inside Comparison View
+        function switchCompPage(pageNum) {
+            [1, 2, 3].forEach(n => {
+                document.getElementById(`compPage${n}`).classList.toggle("hidden", n !== pageNum);
+                document.getElementById(`comp-page-btn-${n}`).classList.toggle("active-btn", n === pageNum);
+            });
+            document.getElementById("compPage1Controls").classList.toggle("hidden", pageNum !== 1);
+            renderComparisonCharts();
+        }
+
+        function renderComparisonCharts() {
+            if (compResults.length === 0) return;
+
+            const isDark = document.documentElement.classList.contains("dark");
+            const textColor = isDark ? "#cbd5e1" : "#334155";
+            const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(15, 23, 42, 0.08)";
+            const param = document.getElementById("compParamSelect").value;
+            const intervalMode = document.getElementById("compIntervalSelect").value;
+
+            // ----------------------------------------------------------------
+            // PAGE 1 CHART: SYNCHRONIZED OVERLAY TIMELINE
+            // ----------------------------------------------------------------
+            const ctx1 = document.getElementById("compOverlayChart").getContext("2d");
+            if (compOverlayChartInst) compOverlayChartInst.destroy();
+
+            const maxLen = Math.max(...compResults.map(p => p.summary.series.length), 1);
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            const labels = Array.from({ length: maxLen }, (_, idx) => {
+                if (intervalMode === "monthly" && maxLen <= 12) {
+                    const firstTime = compResults[0].summary.series[idx]?.timeLocal;
+                    if (firstTime) {
+                        const mIdx = parseInt(firstTime.slice(5, 7), 10) - 1;
+                        if (monthNames[mIdx]) return monthNames[mIdx];
+                    }
+                    return `Month ${idx + 1}`;
+                }
+                if (intervalMode === "weekly") return `Week ${idx + 1}`;
+                if (intervalMode === "daily") return `Day ${idx + 1}`;
+                return `Interval ${idx + 1}`;
+            });
+
+            const overlayDatasets = compResults.map(p => ({
+                label: `${p.label} (${p.start} to ${p.end})`,
+                data: p.summary.series.map(r => r[param]),
+                borderColor: p.color,
+                backgroundColor: param === "precipTotal" ? p.color + "BB" : p.color + "22",
+                borderWidth: 2.5,
+                pointRadius: maxLen > 60 ? 0 : 3,
+                tension: 0.25,
+                fill: param !== "precipTotal"
+            }));
+
+            compOverlayChartInst = new Chart(ctx1, {
+                type: param === "precipTotal" ? "bar" : "line",
+                data: { labels, datasets: overlayDatasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: "index", intersect: false },
+                    plugins: {
+                        legend: { labels: { color: textColor, font: { size: 12, weight: "bold" } } }
+                    },
+                    scales: {
+                        x: { ticks: { color: textColor, maxTicksLimit: 12 }, grid: { color: gridColor } },
+                        y: { ticks: { color: textColor }, grid: { color: gridColor } }
+                    }
+                }
+            });
+
+            // ----------------------------------------------------------------
+            // PAGE 2 CHARTS: MULTI-PARAMETER BAR CHARTS (DISTINCT COLORS PER PARAMETER)
+            // ----------------------------------------------------------------
+            const ctxLeft = document.getElementById("compBarChartLeft").getContext("2d");
+            const ctxRight = document.getElementById("compBarChartRight").getContext("2d");
+            if (compBarLeftInst) compBarLeftInst.destroy();
+            if (compBarRightInst) compBarRightInst.destroy();
+
+            const periodLabels = compResults.map(p => p.label);
+
+            compBarLeftInst = new Chart(ctxLeft, {
+                type: "bar",
+                data: {
+                    labels: periodLabels,
+                    datasets: [
+                        { label: "Max Temp (°C)", data: compResults.map(p => p.summary.tempMax), backgroundColor: "#f43f5e" },
+                        { label: "Avg Temp (°C)", data: compResults.map(p => p.summary.tempAvg), backgroundColor: "#f97316" },
+                        { label: "Min Temp (°C)", data: compResults.map(p => p.summary.tempMin), backgroundColor: "#06b6d4" },
+                        { label: "Mean DewPt (°C)", data: compResults.map(p => p.summary.dewAvg), backgroundColor: "#8b5cf6" },
+                        { label: "Mean Wind (km/h)", data: compResults.map(p => p.summary.windAvg), backgroundColor: "#14b8a6" },
+                        { label: "Max Gust (km/h)", data: compResults.map(p => p.summary.windMaxGust), backgroundColor: "#eab308" }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: textColor, font: { size: 10, weight: "bold" } } } },
+                    scales: {
+                        x: { ticks: { color: textColor, font: { weight: "bold" } }, grid: { color: gridColor } },
+                        y: { ticks: { color: textColor }, grid: { color: gridColor } }
+                    }
+                }
+            });
+
+            compBarRightInst = new Chart(ctxRight, {
+                type: "bar",
+                data: {
+                    labels: periodLabels,
+                    datasets: [
+                        { label: "Total Precip (mm)", data: compResults.map(p => p.summary.precipTotal), backgroundColor: "#2563eb" },
+                        { label: "Max Interval Precip (mm)", data: compResults.map(p => p.summary.precipMaxInterval), backgroundColor: "#38bdf8" },
+                        { label: "Mean Humidity (%)", data: compResults.map(p => p.summary.humAvg), backgroundColor: "#10b981" },
+                        { label: "Max UV Index", data: compResults.map(p => p.summary.uvMax), backgroundColor: "#f59e0b" }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: textColor, font: { size: 10, weight: "bold" } } } },
+                    scales: {
+                        x: { ticks: { color: textColor, font: { weight: "bold" } }, grid: { color: gridColor } },
+                        y: { ticks: { color: textColor }, grid: { color: gridColor } }
+                    }
+                }
+            });
+        }
+
+        // Render Page 3 Complete Parameter Comparison Matrix
+        function renderComparisonMatrixTable() {
+            const thead = document.getElementById("compTableHead");
+            const tbody = document.getElementById("compTableBody");
+            thead.innerHTML = "";
+            tbody.innerHTML = "";
+
+            if (compResults.length === 0) return;
+
+            const isThree = compResults.length === 3;
+            thead.innerHTML = `
+                <tr>
+                    <th class="p-3">Meteorological Parameter</th>
+                    <th class="p-3 text-blue-600 dark:text-blue-400">${compResults[0].label} (${compResults[0].start} → ${compResults[0].end})</th>
+                    <th class="p-3 text-amber-600 dark:text-amber-400">${compResults[1].label} (${compResults[1].start} → ${compResults[1].end})</th>
+                    ${isThree ? `<th class="p-3 text-emerald-600 dark:text-emerald-400">${compResults[2].label} (${compResults[2].start} → ${compResults[2].end})</th>` : ''}
+                    <th class="p-3">Δ Difference (${compResults[0].label} vs ${compResults[1].label})</th>
+                </tr>
+            `;
+
+            const rowsSpec = [
+                { name: "🌡️ Average Temperature (°C)", key: "tempAvg", unit: "°C" },
+                { name: "🔥 Maximum Temperature (°C)", key: "tempMax", unit: "°C" },
+                { name: "❄️ Minimum Temperature (°C)", key: "tempMin", unit: "°C" },
+                { name: "💧 Mean Dew Point (°C)", key: "dewAvg", unit: "°C" },
+                { name: "💦 Mean Relative Humidity (%)", key: "humAvg", unit: "%" },
+                { name: "🌧️ Total Accumulated Precipitation (mm)", key: "precipTotal", unit: "mm" },
+                { name: "⛈️ Maximum Interval / Daily Rainfall (mm)", key: "precipMaxInterval", unit: "mm" },
+                { name: "🌬️ Mean Wind Speed (km/h)", key: "windAvg", unit: "km/h" },
+                { name: "💨 Maximum Wind Gust (km/h)", key: "windMaxGust", unit: "km/h" },
+                { name: "🧭 Prevailing Wind Direction (°)", key: "windDirAvg", unit: "°" },
+                { name: "⏲️ Mean Barometric Pressure (hPa)", key: "pressAvg", unit: "hPa" },
+                { name: "☀️ Maximum UV Index", key: "uvMax", unit: "" },
+                { name: "🔆 Peak Solar Radiation (W/m²)", key: "solarMax", unit: "W/m²" }
+            ];
+
+            rowsSpec.forEach(spec => {
+                const v1 = compResults[0].summary[spec.key];
+                const v2 = compResults[1].summary[spec.key];
+                const v3 = isThree ? compResults[2].summary[spec.key] : null;
+
+                let deltaStr = "--";
+                let deltaColor = "text-slate-500";
+                if (v1 !== null && v2 !== null && !isNaN(v1) && !isNaN(v2)) {
+                    const diff = Number((v1 - v2).toFixed(2));
+                    const sign = diff > 0 ? "+" : "";
+                    deltaStr = `${sign}${diff} ${spec.unit}`;
+                    deltaColor = diff > 0 ? "text-emerald-600 dark:text-emerald-400 font-bold" : (diff < 0 ? "text-rose-500 font-bold" : "text-slate-500");
+                }
+
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold">${spec.name}</td>
+                    <td class="p-3 font-semibold">${v1 ?? '--'} ${spec.unit}</td>
+                    <td class="p-3 font-semibold">${v2 ?? '--'} ${spec.unit}</td>
+                    ${isThree ? `<td class="p-3 font-semibold">${v3 ?? '--'} ${spec.unit}</td>` : ''}
+                    <td class="p-3 font-mono ${deltaColor}">${deltaStr}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Export Multi-Period Comparison Workbook (.xlsx)
+        function exportComparisonExcel() {
+            if (compResults.length === 0) {
+                alert("Please run a comparison first!");
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+            const stSelect = document.getElementById("compStationSelect");
+            const stName = stSelect.options[stSelect.selectedIndex].text;
+
+            const matrixAOA = [
+                ["METEOROLOGICAL CENTER — UNIVERSITY OF SULAIMANI"],
+                ["College of Science • Department of Earth Sciences and Petroleum • Developed by Hawber Ata"],
+                [`MULTI-PERIOD CLIMATIC COMPARISON REPORT — Station: ${stName}`],
+                [],
+                [
+                    "Parameter",
+                    ...compResults.map(p => `${p.label} (${p.start} to ${p.end})`),
+                    `Delta (${compResults[0].label} - ${compResults[1].label})`
+                ]
+            ];
+
+            const metrics = [
+                ["Average Temperature (°C)", "tempAvg"],
+                ["Maximum Temperature (°C)", "tempMax"],
+                ["Minimum Temperature (°C)", "tempMin"],
+                ["Mean Dew Point (°C)", "dewAvg"],
+                ["Mean Relative Humidity (%)", "humAvg"],
+                ["Total Precipitation (mm)", "precipTotal"],
+                ["Maximum Interval Precipitation (mm)", "precipMaxInterval"],
+                ["Mean Wind Speed (km/h)", "windAvg"],
+                ["Maximum Wind Gust (km/h)", "windMaxGust"],
+                ["Mean Wind Direction (°)", "windDirAvg"],
+                ["Mean Barometric Pressure (hPa)", "pressAvg"],
+                ["Maximum UV Index", "uvMax"],
+                ["Peak Solar Radiation (W/m²)", "solarMax"]
+            ];
+
+            metrics.forEach(([label, key]) => {
+                const vals = compResults.map(p => p.summary[key] ?? "");
+                const diff = (vals[0] !== "" && vals[1] !== "") ? Number((vals[0] - vals[1]).toFixed(2)) : "";
+                matrixAOA.push([label, ...vals, diff]);
+            });
+
+            const wsSummary = XLSX.utils.aoa_to_sheet(matrixAOA);
+            wsSummary["!cols"] = new Array(compResults.length + 2).fill({ wch: 28 });
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Comparison_Summary");
+
+            // Dedicated Worksheet for Each Period
+            compResults.forEach((p, idx) => {
+                const aoa = [
+                    ["METEOROLOGICAL CENTER — UNIVERSITY OF SULAIMANI"],
+                    [`Period ${idx + 1}: ${p.label} (${p.start} to ${p.end}) | Station: ${stName}`],
+                    [],
+                    ["Timestamp", "Temp Avg (°C)", "Temp High (°C)", "Temp Low (°C)", "Dew Point (°C)", "Humidity (%)", "Precipitation (mm)", "Wind Speed (km/h)", "Wind Gust (km/h)", "Wind Dir (°)", "Pressure (hPa)", "UV Index", "Solar (W/m²)"]
+                ];
+                p.summary.series.forEach(r => {
+                    aoa.push([
+                        r.timeLocal, r.temp ?? "", r.tempHigh ?? "", r.tempLow ?? "", r.dewpt ?? "",
+                        r.humidity ?? "", r.precipTotal ?? 0, r.windSpeed ?? "", r.windGust ?? "",
+                        r.winddir ?? "", r.pressure ?? "", r.uv ?? "", r.solarRadiation ?? ""
+                    ]);
+                });
+                const ws = XLSX.utils.aoa_to_sheet(aoa);
+                ws["!cols"] = new Array(13).fill({ wch: 16 });
+                const cleanName = `P${idx + 1}_${p.label.replace(/[:\\/?*\[\]]/g, "")}`.slice(0, 31);
+                XLSX.utils.book_append_sheet(wb, ws, cleanName);
+            });
+
+            XLSX.writeFile(wb, `UOS_MultiPeriod_Comparison_${compResults.map(p => p.label.replace(/\s+/g, '')).join('_vs_')}.xlsx`);
         }
 
         // ============================================================================
@@ -1192,7 +1966,7 @@
             const stSelect = document.getElementById("stationSelect");
             const stationText = stSelect.options[stSelect.selectedIndex].text;
             const paramSelect = document.getElementById("paramSelect");
-            const paramText = canvasId === "weatherChart" ? paramSelect.options[paramSelect.selectedIndex].text : "16-Sector Wind Rose Diagram";
+            const paramText = canvasId === "weatherChart" ? paramSelect.options[paramSelect.selectedIndex].text : "Climatic Analytics Diagram";
             const sDate = document.getElementById("startDate").value;
             const eDate = document.getElementById("endDate").value;
 
@@ -1213,7 +1987,7 @@
         }
 
         // ============================================================================
-        // EXPORT MULTI-WORKSHEET EXCEL (.XLSX) WITH UNIVERSITY HEADER & SUMMARY TABLE
+        // EXPORT MULTI-WORKSHEET EXCEL (.XLSX) FOR MAIN DASHBOARD
         // ============================================================================
         function exportToExcel() {
             if (globalDataset.length === 0) {
