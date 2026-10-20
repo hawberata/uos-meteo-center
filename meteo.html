@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meteorological Center - University of Sulaimani</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        uosBlue: '#1e3a8a',
+                        uosGold: '#d97706'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (xlsx) for Multi-Worksheet Excel Export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <style>
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; transition: background-color 0.25s, color 0.25s; }
+        .active-btn { background-color: #2563eb !important; color: #ffffff !important; border-color: #3b82f6 !important; }
+        #miniMap { height: 250px; width: 100%; border-radius: 0.75rem; z-index: 10; }
+        .leaflet-control-layers { font-size: 11px !important; color: #1e293b !important; border-radius: 8px !important; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(148, 163, 184, 0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.5); border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col">
+
+    <!-- ===================================================================== -->
+    <!-- TOP HEADER WITH UOS & COLLEGE OF SCIENCE EMBLEM                       -->
+    <!-- ===================================================================== -->
+    <header class="border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 sticky top-0 z-50 px-4 md:px-6 py-3.5 shadow-sm backdrop-blur">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
+            
+            <!-- Left: Logo & University Branding -->
+            <div class="flex items-center gap-4">
+                <label for="logoUpload" title="Click to upload custom logo image" class="cursor-pointer group relative flex-shrink-0">
+                    <input type="file" id="logoUpload" accept="image/*" class="hidden" onchange="handleCustomLogo(event)">
+                    <div id="defaultLogoContainer" class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-900 to-slate-900 border-2 border-amber-500 flex items-center justify-center shadow-md overflow-hidden">
+                        <svg viewBox="0 0 100 100" class="w-12 h-12">
+                            <circle cx="50" cy="50" r="46" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="4,2"/>
+                            <polygon points="18,65 38,35 55,58 70,40 84,65" fill="#3b82f6" opacity="0.85"/>
+                            <circle cx="50" cy="30" r="8" fill="#fbbf24"/>
+                            <ellipse cx="50" cy="52" rx="28" ry="10" fill="none" stroke="#93c5fd" stroke-width="2" transform="rotate(-20 50 52)"/>
+                            <ellipse cx="50" cy="52" rx="28" ry="10" fill="none" stroke="#93c5fd" stroke-width="2" transform="rotate(20 50 52)"/>
+                            <path d="M25,70 Q50,78 75,70 L75,77 Q50,85 25,77 Z" fill="#f8fafc"/>
+                            <text x="50" y="93" font-size="9" font-weight="bold" fill="#fbbf24" text-anchor="middle" font-family="sans-serif">UOS • SCI</text>
+                        </svg>
+                    </div>
+                    <img id="customLogoImg" class="w-14 h-14 rounded-full object-cover border-2 border-amber-500 hidden" alt="UOS Logo" />
+                </label>
+
+                <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded">
+                            University of Sulaimani • College of Science
+                        </span>
+                        <span class="text-xs text-slate-400 hidden sm:inline">|</span>
+                        <span class="text-xs text-blue-600 dark:text-blue-400 font-medium">Dept. of Earth Sciences & Petroleum</span>
+                    </div>
+                    <h1 class="text-lg md:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white mt-0.5">
+                        Meteorological Center — University of Sulaimani
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        High-Resolution Hydro-Meteorological Telemetry & Wind Rose Analytics • <span class="font-semibold text-slate-700 dark:text-slate-200">Developed by Hawber Ata</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right: Status, Manage Stations, Theme Toggle, Excel & CSV Export -->
+            <div class="flex flex-wrap items-center gap-2">
+                <span id="statusBadge" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Ready
+                </span>
+
+                <button onclick="toggleStationModal()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus-circle text-blue-500"></i> Stations
+                </button>
+
+                <button onclick="toggleTheme()" id="themeBtn" class="p-2 w-9 h-9 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-amber-400 rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center justify-center" title="Toggle Light/Dark Mode">
+                    <i id="themeIcon" class="fa-solid fa-sun"></i>
+                </button>
+
+                <!-- Multi-Sheet Excel (.xlsx) Export Button -->
+                <button onclick="exportToExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs md:text-sm font-bold rounded-lg shadow transition flex items-center gap-1.5" title="Export Excel Workbook with Separate Worksheet per Station">
+                    <i class="fa-solid fa-file-excel"></i> Export Excel (.xlsx)
+                </button>
+
+                <!-- Secondary CSV Export Button -->
+                <button onclick="exportToCSV()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5" title="Export Flat CSV">
+                    <i class="fa-solid fa-file-csv text-emerald-500"></i> CSV
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Bar for Multi-Day / Full-Year 5-Min & Hourly Scraping -->
+        <div id="progressWrapper" class="max-w-7xl mx-auto mt-2.5 hidden">
+            <div class="flex justify-between text-xs font-medium text-blue-600 dark:text-blue-400 mb-1">
+                <span id="progressText">Downloading high-resolution telemetry...</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div id="progressBar" class="bg-blue-600 h-full transition-all duration-150" style="width: 0%"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===================================================================== -->
+    <!-- MAIN CONTENT CONTAINER                                                -->
+    <!-- ===================================================================== -->
+    <main class="max-w-7xl mx-auto w-full px-4 md:px-6 py-5 flex-1 space-y-5">
+
+        <!-- CONTROL PANEL: STATION, INTERVAL, AND DATE RANGE -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm space-y-4">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                <!-- Station Selector -->
+                <div class="lg:col-span-5">
+                    <label class="block text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-1.5">
+                        <i class="fa-solid fa-tower-observation mr-1 text-blue-500"></i> Select Weather Station
+                    </label>
+                    <select id="stationSelect" onchange="onStationChange()" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3.5 py-2 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-blue-500">
+                    </select>
+                </div>
+
+                <!-- Data Interval / Time Resolution -->
+                <div class="lg:col-span-7">
+                    <label class="block text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-1.5">
+                        <i class="fa-solid fa-stopwatch mr-1 text-blue-500"></i> Sampling Interval (Works for Any Date Range)
+                    </label>
+                    <div class="grid grid-cols-5 gap-1.5">
+                        <button onclick="setIntervalMode('5min')" id="int-5min" class="int-btn active-btn px-2.5 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 transition">5-Min</button>
+                        <button onclick="setIntervalMode('hourly')" id="int-hourly" class="int-btn px-2.5 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 transition">1-Hour</button>
+                        <button onclick="setIntervalMode('daily')" id="int-daily" class="int-btn px-2.5 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 transition">Daily</button>
+                        <button onclick="setIntervalMode('weekly')" id="int-weekly" class="int-btn px-2.5 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 transition">Weekly</button>
+                        <button onclick="setIntervalMode('monthly')" id="int-monthly" class="int-btn px-2.5 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 transition">Monthly</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Date Pickers + Quick Presets -->
+            <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-end justify-between gap-3">
+                <div class="flex flex-wrap items-end gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Start Date</label>
+                        <input type="date" id="startDate" class="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">End Date</label>
+                        <input type="date" id="endDate" class="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-white">
+                    </div>
+                    <button onclick="loadWeatherData()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg shadow transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-bolt"></i> Fetch & Plot Data
+                    </button>
+                </div>
+
+                <!-- Quick Date Range Presets -->
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="text-xs text-slate-400 mr-1">Quick Range:</span>
+                    <button onclick="setQuickRange(0)" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700">Today</button>
+                    <button onclick="setQuickRange(7)" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700">Last 7 Days</button>
+                    <button onclick="setQuickRange(30)" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700">Last 30 Days</button>
+                    <button onclick="setQuickRange(90)" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700">3 Months</button>
+                    <button onclick="setQuickRange(365)" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700">1 Year</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- 8 METEOROLOGICAL SUMMARY KPI CARDS                                    -->
+        <!-- ===================================================================== -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm">
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex justify-between"><span>Temp (Avg)</span><i class="fa-solid fa-temperature-half text-orange-500"></i></div>
+                <div id="kpi-temp" class="text-xl font-extrabold mt-1">-- °C</div>
+                <div id="kpi-temp-minmax" class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+                    <span class="text-rose-500">H: --°</span> • <span class="text-cyan-500">L: --°</span>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm">
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex justify-between"><span>Dew Point</span><i class="fa-solid fa-temperature-arrow-down text-cyan-500"></i></div>
+                <div id="kpi-dew" class="text-xl font-extrabold mt-1">-- °C</div>
+                <div id="kpi-dew-sub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Max: -- °C</div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm">
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex justify-between"><span>Humidity</span><i class="fa-solid fa-droplet text-sky-500"></i></div>
+                <div id="kpi-hum" class="text-xl font-extrabold mt-1">-- %</div>
+                <div id="kpi-hum-sub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Range: --%</div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm">
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex justify-between"><span id="kpi-precip-title">Precipitation</span><i class="fa-solid fa-cloud-showers-heavy text-blue-500"></i></div>
+                <div id="kpi-precip" class="text-xl font-extrabold mt-1 text-blue-600 dark:text-blue-400">-- mm</div>
+                <div id="kpi-precip-sub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Max Rate: -- mm/h</div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm">
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex justify-between"><span>Wind Speed</span><i class="fa-solid fa-wind text-teal-500"></i></div>
+                <div id="kpi-wind" class="text-xl font-extrabold mt-1">-- km/h</div>
+                <div id="kpi-wind-sub" class="text-[11px] text-rose-500 font-semibold mt-0.5">Max Gust: -- km/h</div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm">
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex justify-between"><span>Mean Wind Dir</span><i class="fa-regular fa-compass text-indigo-500"></i></div>
+                <div id="kpi-winddir" class="text-xl font-extrabold mt-1">--°</div>
+                <div id="kpi-winddir-sub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Sector: --</div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm">
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex justify-between"><span>Pressure</span><i class="fa-solid fa-gauge-high text-purple-500"></i></div>
+                <div id="kpi-press" class="text-xl font-extrabold mt-1">-- hPa</div>
+                <div id="kpi-press-sub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Mean Baro</div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm">
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex justify-between"><span>Max UV / Solar</span><i class="fa-solid fa-sun text-amber-500"></i></div>
+                <div id="kpi-uv" class="text-xl font-extrabold mt-1">UV: --</div>
+                <div id="kpi-solar-sub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Peak: -- W/m²</div>
+            </div>
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- MAIN TIME-SERIES GRAPH + WIND ROSE (WITH PNG IMAGE EXPORT BUTTONS)    -->
+        <!-- ===================================================================== -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            
+            <!-- Left 8 Columns: Main Parameter Chart -->
+            <div class="lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
+                <div class="flex flex-wrap justify-between items-center gap-3 mb-3">
+                    <div>
+                        <h2 class="text-base font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-chart-area text-blue-500"></i> Meteorological Parameter Time-Series
+                        </h2>
+                        <p id="chartSubtitle" class="text-xs text-slate-500 dark:text-slate-400">High-resolution telemetry</p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="paramSelect" onchange="updateChart()" class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-bold focus:outline-none focus:border-blue-500">
+                            <option value="temp">🌡️ Temperature (Min / Avg / Max °C)</option>
+                            <option value="precipTotal">🌧️ Precipitation (mm)</option>
+                            <option value="precipRate">⛈️ Precipitation Rate (mm/hr)</option>
+                            <option value="humidity">💦 Relative Humidity (%)</option>
+                            <option value="dewpt">💧 Dew Point (°C)</option>
+                            <option value="windSpeed">🌬️ Wind Speed & Gust (km/h)</option>
+                            <option value="winddir">🧭 Wind Direction (°)</option>
+                            <option value="pressure">⏲️ Barometric Pressure (hPa)</option>
+                            <option value="uv">☀️ UV Index</option>
+                            <option value="solarRadiation">🔆 Solar Radiation (W/m²)</option>
+                        </select>
+
+                        <!-- Export Time-Series Graph as PNG -->
+                        <button onclick="exportChartImage('weatherChart', 'TimeSeries_Graph')" class="px-3 py-1.5 bg-blue-600/15 hover:bg-blue-600/25 text-blue-600 dark:text-blue-400 border border-blue-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1.5" title="Download High-Resolution PNG of this Graph">
+                            <i class="fa-solid fa-camera"></i> Save Graph PNG
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative w-full h-[380px]">
+                    <canvas id="weatherChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Right 4 Columns: Wind Rose Diagram -->
+            <div class="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <h2 class="text-base font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-compass text-teal-500"></i> Wind Rose Diagram
+                        </h2>
+                        <!-- Export Wind Rose as PNG -->
+                        <button onclick="exportChartImage('windRoseChart', 'WindRose_Diagram')" class="px-2.5 py-1 bg-teal-600/15 hover:bg-teal-600/25 text-teal-600 dark:text-teal-400 border border-teal-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1" title="Download High-Resolution PNG of Wind Rose">
+                            <i class="fa-solid fa-camera"></i> Save PNG
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">16-Sector Directional Frequency (%) & Mean Speed</p>
+                </div>
+
+                <div class="relative w-full h-[300px] flex items-center justify-center">
+                    <canvas id="windRoseChart"></canvas>
+                </div>
+
+                <div id="windRoseSummary" class="mt-3 text-center text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 py-2 px-3 rounded-lg border border-slate-200 dark:border-slate-800">
+                    Prevailing Wind: <strong id="prevailingDir" class="text-slate-800 dark:text-white">--</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- STATION LOCATION MAP & DATA LOG TABLE                                 -->
+        <!-- ===================================================================== -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            
+            <!-- Left 4 Columns: Interactive Map -->
+            <div class="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between space-y-3">
+                <div>
+                    <h2 class="text-base font-bold flex items-center gap-2 mb-1">
+                        <i class="fa-solid fa-map-location-dot text-blue-500"></i> Station Network Map
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-2.5">Click any station marker to isolate its readings</p>
+                    <div id="miniMap" class="border border-slate-300 dark:border-slate-700"></div>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-slate-800/70 rounded-lg p-3 border border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
+                    <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Selected View:</span><span id="meta-name" class="font-bold">Hawber Station</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">WU Station ID:</span><span id="meta-id" class="font-mono text-blue-600 dark:text-blue-400">IKANIS1</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Coordinates:</span><span id="meta-coords" class="font-mono">35.5500° N, 45.4800° E</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Loaded Rows:</span><span id="meta-count" class="font-bold text-emerald-600 dark:text-emerald-400">0 intervals</span></div>
+                </div>
+            </div>
+
+            <!-- Right 8 Columns: Telemetry Data Table -->
+            <div class="lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col">
+                <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+                    <h2 class="text-base font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-table text-blue-500"></i> Complete Telemetry Log
+                    </h2>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">Showing latest 150 intervals (Click <b>Export Excel</b> for multi-sheet workbook)</span>
+                </div>
+                <div class="overflow-x-auto max-h-[340px] flex-1 border border-slate-200 dark:border-slate-800 rounded-lg">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 sticky top-0">
+                            <tr>
+                                <th class="p-2.5">Timestamp</th>
+                                <th class="p-2.5">Station</th>
+                                <th class="p-2.5">Temp Avg (°C)</th>
+                                <th class="p-2.5 text-rose-500">Temp High</th>
+                                <th class="p-2.5 text-cyan-500">Temp Low</th>
+                                <th class="p-2.5">Humidity (%)</th>
+                                <th class="p-2.5 text-blue-500">Precip (mm)</th>
+                                <th class="p-2.5">Wind (km/h)</th>
+                                <th class="p-2.5">Gust (km/h)</th>
+                                <th class="p-2.5">Dir</th>
+                                <th class="p-2.5">Press (hPa)</th>
+                                <th class="p-2.5">UV / Solar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody" class="divide-y divide-slate-200 dark:divide-slate-800">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL: ADD / MANAGE CUSTOM WEATHER STATIONS                           -->
+    <!-- ===================================================================== -->
+    <div id="stationModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+                <h3 class="text-base font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-tower-cell text-blue-500"></i> Manage Weather Stations
+                </h3>
+                <button onclick="toggleStationModal()" class="text-slate-400 hover:text-rose-500 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div id="modalStationList" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
+
+            <div class="border-t border-slate-200 dark:border-slate-800 pt-3 space-y-3">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Add New Weather Underground Station</h4>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <input type="text" id="newStName" placeholder="Station Name (e.g. Dukan Dam)" class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs">
+                    <input type="text" id="newStId" placeholder="WU ID (e.g. ISULAY2)" class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-mono uppercase">
+                    <input type="number" step="0.0001" id="newStLat" placeholder="Latitude (e.g. 35.56)" class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs">
+                    <input type="number" step="0.0001" id="newStLon" placeholder="Longitude (e.g. 45.42)" class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs">
+                </div>
+                <div class="flex justify-between pt-2">
+                    <button onclick="resetDefaultStations()" class="px-3 py-1.5 text-xs font-semibold text-rose-500 hover:bg-rose-500/10 rounded-lg transition">
+                        Reset to Default 4 Stations
+                    </button>
+                    <button onclick="addNewStation()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition">
+                        <i class="fa-solid fa-plus mr-1"></i> Add Station
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- APPLICATION JAVASCRIPT                                                -->
+    <!-- ===================================================================== -->
+    <script>
+        const WU_API_KEY = "e1f10a1e78da46f5b10a1e78da96f525";
+        const PALETTE = ["#3b82f6", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6", "#06b6d4", "#ef4444", "#84cc16"];
+
+        const DEFAULT_STATIONS = [
+            { id: "IKANIS1",   name: "Hawber Station",   lat: 35.55, lon: 45.48, color: "#3b82f6" },
+            { id: "IQALIA1",   name: "UOS - New Campus", lat: 35.58, lon: 45.37, color: "#10b981" },
+            { id: "I90583621", name: "UOS - Bakrajo",    lat: 35.54, lon: 45.36, color: "#f59e0b" },
+            { id: "I90583618", name: "UOS - Old Campus", lat: 35.57, lon: 45.44, color: "#ec4899" }
+        ];
+
+        let STATIONS = JSON.parse(localStorage.getItem("uos_stations")) || DEFAULT_STATIONS;
+        let currentInterval = "5min";
+        let globalDataset = [];
+        let chartInstance = null;
+        let windRoseInstance = null;
+        let mapInstance = null;
+        let markerLayer = null;
+
+        window.addEventListener("DOMContentLoaded", () => {
+            populateStationDropdown();
+            initMap();
+            setQuickRange(0);
+        });
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById("themeIcon");
+            if (html.classList.contains("dark")) {
+                html.classList.remove("dark");
+                icon.className = "fa-solid fa-moon text-slate-700";
+            } else {
+                html.classList.add("dark");
+                icon.className = "fa-solid fa-sun text-amber-400";
+            }
+            updateChart();
+            updateWindRose();
+        }
+
+        function handleCustomLogo(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById("defaultLogoContainer").classList.add("hidden");
+                const img = document.getElementById("customLogoImg");
+                img.src = e.target.result;
+                img.classList.remove("hidden");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ============================================================================
+        // STATION MANAGEMENT
+        // ============================================================================
+        function populateStationDropdown() {
+            const sel = document.getElementById("stationSelect");
+            const currentVal = sel.value || STATIONS[0].id;
+            sel.innerHTML = "";
+
+            STATIONS.forEach(st => {
+                const opt = document.createElement("option");
+                opt.value = st.id;
+                opt.textContent = `${st.name} (${st.id})`;
+                sel.appendChild(opt);
+            });
+
+            const allOpt = document.createElement("option");
+            allOpt.value = "ALL";
+            allOpt.textContent = `📊 Compare All ${STATIONS.length} Stations (Areal Mean)`;
+            sel.appendChild(allOpt);
+
+            if ([...sel.options].some(o => o.value === currentVal)) {
+                sel.value = currentVal;
+            }
+            renderModalStationList();
+        }
+
+        function toggleStationModal() {
+            document.getElementById("stationModal").classList.toggle("hidden");
+            renderModalStationList();
+        }
+
+        function renderModalStationList() {
+            const container = document.getElementById("modalStationList");
+            if (!container) return;
+            container.innerHTML = "";
+            STATIONS.forEach((st, idx) => {
+                const row = document.createElement("div");
+                row.className = "flex justify-between items-center bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-lg text-xs";
+                row.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full inline-block" style="background:${st.color}"></span>
+                        <span class="font-bold">${st.name}</span>
+                        <span class="font-mono text-slate-400">(${st.id})</span>
+                    </div>
+                    ${STATIONS.length > 1 ? `<button onclick="removeStation(${idx})" class="text-rose-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>` : ''}
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function addNewStation() {
+            const name = document.getElementById("newStName").value.trim();
+            const id = document.getElementById("newStId").value.trim().toUpperCase();
+            const lat = parseFloat(document.getElementById("newStLat").value);
+            const lon = parseFloat(document.getElementById("newStLon").value);
+
+            if (!name || !id || isNaN(lat) || isNaN(lon)) {
+                alert("Please fill in Station Name, WU ID, Latitude, and Longitude.");
+                return;
+            }
+
+            const color = PALETTE[STATIONS.length % PALETTE.length];
+            STATIONS.push({ id, name, lat, lon, color });
+            localStorage.setItem("uos_stations", JSON.stringify(STATIONS));
+
+            document.getElementById("newStName").value = "";
+            document.getElementById("newStId").value = "";
+            populateStationDropdown();
+            refreshMapMarkers();
+            loadWeatherData();
+        }
+
+        function removeStation(index) {
+            STATIONS.splice(index, 1);
+            localStorage.setItem("uos_stations", JSON.stringify(STATIONS));
+            populateStationDropdown();
+            refreshMapMarkers();
+            loadWeatherData();
+        }
+
+        function resetDefaultStations() {
+            STATIONS = [...DEFAULT_STATIONS];
+            localStorage.setItem("uos_stations", JSON.stringify(STATIONS));
+            populateStationDropdown();
+            refreshMapMarkers();
+            loadWeatherData();
+        }
+
+        // ============================================================================
+        // LEAFLET MAP (ESRI ARCGIS TILES - NEVER BLOCKS LOCAL FILES OR REQUIRES API KEY)
+        // ============================================================================
+        function initMap() {
+            mapInstance = L.map('miniMap').setView([35.56, 45.41], 11);
+
+            const esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri'
+            });
+
+            const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri'
+            });
+
+            const esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri'
+            });
+
+            esriTopo.addTo(mapInstance);
+
+            L.control.layers({
+                "🗺️ Topographic": esriTopo,
+                "🛰️ Satellite": esriSat,
+                "🛣️ Street Map": esriStreet
+            }, null, { position: 'topright', collapsed: true }).addTo(mapInstance);
+
+            markerLayer = L.layerGroup().addTo(mapInstance);
+            refreshMapMarkers();
+        }
+
+        function refreshMapMarkers() {
+            if (!markerLayer) return;
+            markerLayer.clearLayers();
+            STATIONS.forEach(st => {
+                const circle = L.circleMarker([st.lat, st.lon], {
+                    radius: 9,
+                    fillColor: st.color,
+                    color: "#ffffff",
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.9
+                }).addTo(markerLayer);
+
+                circle.bindTooltip(`<b>${st.name}</b><br>ID: ${st.id}`, { direction: "top" });
+                circle.on('click', () => {
+                    document.getElementById("stationSelect").value = st.id;
+                    onStationChange();
+                });
+            });
+        }
+
+        // ============================================================================
+        // INTERVAL & DATE CONTROLS
+        // ============================================================================
+        function setIntervalMode(mode) {
+            currentInterval = mode;
+            document.querySelectorAll(".int-btn").forEach(b => b.classList.remove("active-btn"));
+            document.getElementById(`int-${mode}`).classList.add("active-btn");
+            loadWeatherData();
+        }
+
+        function setQuickRange(daysBack) {
+            const end = new Date();
+            const start = new Date();
+            start.setDate(end.getDate() - daysBack);
+
+            document.getElementById("endDate").value = end.toISOString().split('T')[0];
+            document.getElementById("startDate").value = start.toISOString().split('T')[0];
+
+            if (daysBack >= 180 && currentInterval === "5min") {
+                setIntervalMode("daily");
+            } else {
+                loadWeatherData();
+            }
+        }
+
+        function onStationChange() {
+            const val = document.getElementById("stationSelect").value;
+            if (val !== "ALL") {
+                const st = STATIONS.find(s => s.id === val);
+                if (st) {
+                    mapInstance.setView([st.lat, st.lon], 13);
+                    document.getElementById("meta-name").textContent = st.name;
+                    document.getElementById("meta-id").textContent = st.id;
+                    document.getElementById("meta-coords").textContent = `${st.lat.toFixed(4)}° N, ${st.lon.toFixed(4)}° E`;
+                }
+            } else {
+                mapInstance.setView([35.56, 45.41], 11);
+                document.getElementById("meta-name").textContent = `All ${STATIONS.length} Active Stations`;
+                document.getElementById("meta-id").textContent = STATIONS.map(s => s.id).join(", ");
+                document.getElementById("meta-coords").textContent = "Sulaimani Basin Network";
+            }
+            loadWeatherData();
+        }
+
+        // ============================================================================
+        // DATA FETCH ENGINE
+        // ============================================================================
+        function getDaysList(startStr, endStr) {
+            const list = [];
+            let curr = new Date(startStr);
+            const end = new Date(endStr);
+            while (curr <= end) {
+                list.push(curr.toISOString().split('T')[0].replaceAll("-", ""));
+                curr.setDate(curr.getDate() + 1);
+            }
+            return list;
+        }
+
+        function getDateChunks(startStr, endStr, maxDays) {
+            const chunks = [];
+            let curr = new Date(startStr);
+            const end = new Date(endStr);
+            while (curr <= end) {
+                let next = new Date(curr);
+                next.setDate(curr.getDate() + maxDays);
+                if (next > end) next = new Date(end);
+                chunks.push({
+                    start: curr.toISOString().split('T')[0].replaceAll("-", ""),
+                    end: next.toISOString().split('T')[0].replaceAll("-", "")
+                });
+                curr = new Date(next);
+                curr.setDate(curr.getDate() + 1);
+            }
+            return chunks;
+        }
+
+        function firstNum(...vals) {
+            for (const v of vals) {
+                if (v !== undefined && v !== null && !isNaN(v)) return Number(v);
+            }
+            return null;
+        }
+
+        async function fetchStationData(stationId, stationName, onProgress) {
+            const startVal = document.getElementById("startDate").value;
+            const endVal = document.getElementById("endDate").value;
+            let rawObs = [];
+
+            if (currentInterval === "5min" || currentInterval === "hourly") {
+                const days = getDaysList(startVal, endVal);
+                const batchSize = 6;
+                for (let i = 0; i < days.length; i += batchSize) {
+                    const batch = days.slice(i, i + batchSize);
+                    const promises = batch.map(async (dateStr) => {
+                        const url = `https://api.weather.com/v2/pws/history/all?stationId=${stationId}&format=json&units=m&date=${dateStr}&numericPrecision=decimal&apiKey=${WU_API_KEY}`;
+                        try {
+                            const res = await fetch(url);
+                            if (res.ok) {
+                                const json = await res.json();
+                                return (json && json.observations) ? json.observations : [];
+                            }
+                        } catch (e) {}
+                        return [];
+                    });
+                    const batchResults = await Promise.all(promises);
+                    batchResults.forEach(arr => rawObs = rawObs.concat(arr));
+                    if (onProgress) onProgress(Math.min(days.length, i + batch.length), days.length);
+                }
+            } else {
+                const chunks = getDateChunks(startVal, endVal, 30);
+                for (let i = 0; i < chunks.length; i++) {
+                    const ch = chunks[i];
+                    const url = `https://api.weather.com/v2/pws/history/daily?stationId=${stationId}&format=json&units=m&startDate=${ch.start}&endDate=${ch.end}&numericPrecision=decimal&apiKey=${WU_API_KEY}`;
+                    try {
+                        const res = await fetch(url);
+                        if (res.ok) {
+                            const json = await res.json();
+                            if (json && json.observations) rawObs = rawObs.concat(json.observations);
+                        }
+                    } catch (e) {}
+                    if (onProgress) onProgress(i + 1, chunks.length);
+                }
+            }
+
+            let prevDay = "";
+            let prevCumPrecip = 0;
+
+            const normalized = rawObs.map(o => {
+                const m = o.metric || {};
+                const timeStr = o.obsTimeLocal ? o.obsTimeLocal.slice(0, 16) : "";
+                const dayPart = timeStr.slice(0, 10);
+                const cumPrecip = firstNum(m.precipTotal, 0);
+                let intervalPrecip = cumPrecip;
+
+                if (currentInterval === "5min" || currentInterval === "hourly") {
+                    if (dayPart !== prevDay) {
+                        intervalPrecip = cumPrecip;
+                        prevDay = dayPart;
+                    } else {
+                        intervalPrecip = Math.max(0, Number((cumPrecip - prevCumPrecip).toFixed(2)));
+                    }
+                    prevCumPrecip = cumPrecip;
+                }
+
+                return {
+                    stationId,
+                    stationName,
+                    timeLocal: timeStr,
+                    dayKey: dayPart,
+                    temp: firstNum(m.tempAvg, m.temp),
+                    tempHigh: firstNum(m.tempHigh, m.tempAvg, m.temp),
+                    tempLow: firstNum(m.tempLow, m.tempAvg, m.temp),
+                    dewpt: firstNum(m.dewptAvg, m.dewpt),
+                    humidity: firstNum(o.humidityAvg, o.humidity),
+                    precipTotal: intervalPrecip,
+                    cumDailyPrecip: cumPrecip,
+                    precipRate: firstNum(m.precipRate, 0),
+                    windSpeed: firstNum(m.windspeedAvg, m.windSpeed),
+                    windGust: firstNum(m.windgustHigh, m.windgustAvg, m.windGust),
+                    winddir: firstNum(o.winddirAvg, o.winddir),
+                    pressure: firstNum(m.pressureMax, m.pressureMin, m.pressure),
+                    uv: firstNum(o.uvHigh, o.uv),
+                    solarRadiation: firstNum(o.solarRadiationHigh, o.solarRadiation)
+                };
+            });
+
+            if (currentInterval === "hourly") return aggregateRecords(normalized, "hour");
+            if (currentInterval === "weekly") return aggregateRecords(normalized, "week");
+            if (currentInterval === "monthly") return aggregateRecords(normalized, "month");
+            return normalized;
+        }
+
+        function aggregateRecords(records, mode) {
+            const groups = {};
+            records.forEach(r => {
+                if (!r.timeLocal) return;
+                let key = "";
+                if (mode === "hour") {
+                    key = r.timeLocal.slice(0, 13) + ":00";
+                } else if (mode === "month") {
+                    key = r.timeLocal.slice(0, 7);
+                } else if (mode === "week") {
+                    const d = new Date(r.timeLocal.slice(0, 10));
+                    const day = d.getDay() || 7;
+                    const monday = new Date(d);
+                    monday.setDate(d.getDate() - day + 1);
+                    key = `${monday.toISOString().split('T')[0]}`;
+                }
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(r);
+            });
+
+            return Object.keys(groups).sort().map(k => {
+                const arr = groups[k];
+                const avg = (p) => {
+                    const v = arr.map(x => x[p]).filter(n => n !== null && !isNaN(n));
+                    return v.length ? Number((v.reduce((a, b) => a + b, 0) / v.length).toFixed(2)) : null;
+                };
+                const max = (p) => {
+                    const v = arr.map(x => x[p]).filter(n => n !== null && !isNaN(n));
+                    return v.length ? Number(Math.max(...v).toFixed(2)) : null;
+                };
+                const min = (p) => {
+                    const v = arr.map(x => x[p]).filter(n => n !== null && !isNaN(n));
+                    return v.length ? Number(Math.min(...v).toFixed(2)) : null;
+                };
+                const sum = (p) => {
+                    const v = arr.map(x => x[p]).filter(n => n !== null && !isNaN(n));
+                    return v.length ? Number(v.reduce((a, b) => a + b, 0).toFixed(2)) : 0;
+                };
+
+                return {
+                    stationId: arr[0].stationId,
+                    stationName: arr[0].stationName,
+                    timeLocal: k,
+                    temp: avg("temp"),
+                    tempHigh: max("tempHigh"),
+                    tempLow: min("tempLow"),
+                    dewpt: avg("dewpt"),
+                    humidity: avg("humidity"),
+                    precipTotal: sum("precipTotal"),
+                    precipRate: max("precipRate"),
+                    windSpeed: avg("windSpeed"),
+                    windGust: max("windGust"),
+                    winddir: avg("winddir"),
+                    pressure: avg("pressure"),
+                    uv: max("uv"),
+                    solarRadiation: max("solarRadiation")
+                };
+            });
+        }
+
+        async function loadWeatherData() {
+            const badge = document.getElementById("statusBadge");
+            const progWrap = document.getElementById("progressWrapper");
+            const progBar = document.getElementById("progressBar");
+            const progText = document.getElementById("progressText");
+            const progPct = document.getElementById("progressPercent");
+
+            badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Loading...`;
+            progWrap.classList.remove("hidden");
+            progBar.style.width = "5%";
+
+            const selected = document.getElementById("stationSelect").value;
+            globalDataset = [];
+
+            if (selected === "ALL") {
+                let completedStations = 0;
+                const promises = STATIONS.map(async (st) => {
+                    const data = await fetchStationData(st.id, st.name, (done, total) => {
+                        const pct = Math.round(((completedStations + (done / total)) / STATIONS.length) * 100);
+                        progBar.style.width = `${pct}%`;
+                        progPct.textContent = `${pct}%`;
+                        progText.textContent = `Fetching ${st.name} (${done}/${total} batches)...`;
+                    });
+                    completedStations++;
+                    return data;
+                });
+                const results = await Promise.all(promises);
+                results.forEach(arr => globalDataset = globalDataset.concat(arr));
+            } else {
+                const st = STATIONS.find(s => s.id === selected) || STATIONS[0];
+                globalDataset = await fetchStationData(st.id, st.name, (done, total) => {
+                    const pct = Math.round((done / total) * 100);
+                    progBar.style.width = `${pct}%`;
+                    progPct.textContent = `${pct}%`;
+                    progText.textContent = `Fetching ${st.name} (${done}/${total} batches)...`;
+                });
+            }
+
+            setTimeout(() => progWrap.classList.add("hidden"), 400);
+            document.getElementById("meta-count").textContent = `${globalDataset.length.toLocaleString()} intervals`;
+
+            if (globalDataset.length > 0) {
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Online (${globalDataset.length.toLocaleString()} pts)`;
+            } else {
+                badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500"></i> No Data Found`;
+            }
+
+            updateKPIs();
+            updateChart();
+            updateWindRose();
+            updateTable();
+        }
+
+        // ============================================================================
+        // KPI CARDS & CHARTS
+        // ============================================================================
+        function degToCompass(num) {
+            if (num === null || isNaN(num)) return "--";
+            const val = Math.floor((num / 22.5) + 0.5);
+            const arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+            return arr[(val % 16)];
+        }
+
+        function updateKPIs() {
+            if (globalDataset.length === 0) return;
+
+            const selected = document.getElementById("stationSelect").value;
+            const valid = (prop) => globalDataset.map(d => d[prop]).filter(v => v !== null && !isNaN(v));
+            const mean = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+
+            const temps = valid("temp");
+            const highs = valid("tempHigh");
+            const lows = valid("tempLow");
+            const dews = valid("dewpt");
+            const hums = valid("humidity");
+            const winds = valid("windSpeed");
+            const gusts = valid("windGust");
+            const dirs = valid("winddir");
+            const press = valid("pressure");
+            const uvs = valid("uv");
+            const solars = valid("solarRadiation");
+            const rates = valid("precipRate");
+
+            const avgTemp = mean(temps);
+            const maxTemp = highs.length ? Math.max(...highs) : null;
+            const minTemp = lows.length ? Math.min(...lows) : null;
+
+            document.getElementById("kpi-temp").textContent = avgTemp !== null ? `${avgTemp.toFixed(1)} °C` : "-- °C";
+            document.getElementById("kpi-temp-minmax").innerHTML = `
+                <span class="text-rose-500">Max: ${maxTemp !== null ? maxTemp.toFixed(1) : '--'}°</span> • 
+                <span class="text-cyan-500">Min: ${minTemp !== null ? minTemp.toFixed(1) : '--'}°</span>
+            `;
+
+            const avgDew = mean(dews);
+            document.getElementById("kpi-dew").textContent = avgDew !== null ? `${avgDew.toFixed(1)} °C` : "-- °C";
+            document.getElementById("kpi-dew-sub").textContent = `Max: ${dews.length ? Math.max(...dews).toFixed(1) : '--'} °C`;
+
+            const avgHum = mean(hums);
+            document.getElementById("kpi-hum").textContent = avgHum !== null ? `${avgHum.toFixed(0)} %` : "-- %";
+            document.getElementById("kpi-hum-sub").textContent = hums.length ? `Min ${Math.min(...hums).toFixed(0)}% / Max ${Math.max(...hums).toFixed(0)}%` : "Range: --";
+
+            const stationTotals = {};
+            globalDataset.forEach(r => {
+                if (!stationTotals[r.stationId]) stationTotals[r.stationId] = 0;
+                stationTotals[r.stationId] += (r.precipTotal || 0);
+            });
+            const activeStationIds = Object.keys(stationTotals);
+            const sumAllStations = Object.values(stationTotals).reduce((a, b) => a + b, 0);
+
+            if (selected === "ALL" && activeStationIds.length > 0) {
+                const arealAverage = sumAllStations / activeStationIds.length;
+                document.getElementById("kpi-precip-title").textContent = `Areal Mean (${activeStationIds.length} Stn)`;
+                document.getElementById("kpi-precip").textContent = `${arealAverage.toFixed(2)} mm`;
+                document.getElementById("kpi-precip-sub").textContent = `Divided by ${activeStationIds.length} active stations`;
+            } else {
+                document.getElementById("kpi-precip-title").textContent = "Total Precip";
+                document.getElementById("kpi-precip").textContent = `${sumAllStations.toFixed(2)} mm`;
+                document.getElementById("kpi-precip-sub").textContent = `Max Rate: ${rates.length ? Math.max(...rates).toFixed(1) : '0.0'} mm/h`;
+            }
+
+            const avgWind = mean(winds);
+            document.getElementById("kpi-wind").textContent = avgWind !== null ? `${avgWind.toFixed(1)} km/h` : "-- km/h";
+            document.getElementById("kpi-wind-sub").textContent = `Max Gust: ${gusts.length ? Math.max(...gusts).toFixed(1) : '--'} km/h`;
+
+            const avgDir = mean(dirs);
+            document.getElementById("kpi-winddir").textContent = avgDir !== null ? `${avgDir.toFixed(0)}°` : "--°";
+            document.getElementById("kpi-winddir-sub").textContent = `Sector: ${degToCompass(avgDir)}`;
+
+            const avgPress = mean(press);
+            document.getElementById("kpi-press").textContent = avgPress !== null ? `${avgPress.toFixed(1)} hPa` : "-- hPa";
+
+            document.getElementById("kpi-uv").textContent = `UV: ${uvs.length ? Math.max(...uvs).toFixed(1) : '--'}`;
+            document.getElementById("kpi-solar-sub").textContent = `Peak: ${solars.length ? Math.max(...solars).toFixed(0) : '--'} W/m²`;
+        }
+
+        function updateChart() {
+            const ctx = document.getElementById("weatherChart").getContext("2d");
+            const param = document.getElementById("paramSelect").value;
+            const selectedStation = document.getElementById("stationSelect").value;
+            const isDark = document.documentElement.classList.contains("dark");
+            const textColor = isDark ? "#cbd5e1" : "#334155";
+            const gridColor = isDark ? "rgba(148, 163, 184, 0.1)" : "rgba(15, 23, 42, 0.08)";
+
+            if (chartInstance) chartInstance.destroy();
+
+            const isBar = (param === "precipTotal");
+            let datasets = [];
+            let labels = [];
+
+            if (selectedStation === "ALL") {
+                labels = [...new Set(globalDataset.map(d => d.timeLocal))].sort();
+                STATIONS.forEach(st => {
+                    const stData = globalDataset.filter(d => d.stationId === st.id);
+                    const mapObj = {};
+                    stData.forEach(d => mapObj[d.timeLocal] = d[param]);
+                    datasets.push({
+                        label: st.name,
+                        data: labels.map(l => mapObj[l] ?? null),
+                        borderColor: st.color,
+                        backgroundColor: isBar ? st.color + "AA" : st.color + "22",
+                        borderWidth: 2,
+                        pointRadius: labels.length > 80 ? 0 : 2,
+                        tension: 0.25,
+                        fill: false
+                    });
+                });
+            } else {
+                labels = globalDataset.map(d => d.timeLocal);
+                const st = STATIONS.find(s => s.id === selectedStation) || STATIONS[0];
+
+                if (param === "temp") {
+                    datasets.push({
+                        label: "Max Temp (°C)",
+                        data: globalDataset.map(d => d.tempHigh),
+                        borderColor: "#f43f5e",
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        tension: 0.25,
+                        fill: false
+                    });
+                    datasets.push({
+                        label: "Avg Temp (°C)",
+                        data: globalDataset.map(d => d.temp),
+                        borderColor: st.color,
+                        backgroundColor: st.color + "20",
+                        borderWidth: 2.5,
+                        pointRadius: labels.length > 80 ? 0 : 2,
+                        tension: 0.25,
+                        fill: true
+                    });
+                    datasets.push({
+                        label: "Min Temp (°C)",
+                        data: globalDataset.map(d => d.tempLow),
+                        borderColor: "#06b6d4",
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        tension: 0.25,
+                        fill: false
+                    });
+                } else {
+                    datasets.push({
+                        label: `${st.name} (${param})`,
+                        data: globalDataset.map(d => d[param]),
+                        borderColor: st.color,
+                        backgroundColor: isBar ? "#3b82f6" : st.color + "25",
+                        borderWidth: 2,
+                        pointRadius: labels.length > 80 ? 0 : 2.5,
+                        tension: 0.25,
+                        fill: !isBar
+                    });
+
+                    if (param === "windSpeed") {
+                        datasets.push({
+                            label: "Wind Gust (km/h)",
+                            data: globalDataset.map(d => d.windGust),
+                            borderColor: "#f43f5e",
+                            borderDash: [4, 4],
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            fill: false
+                        });
+                    }
+                }
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: isBar ? 'bar' : 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { labels: { color: textColor, font: { size: 11, weight: 'bold' } } }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: textColor, maxTicksLimit: 10, font: { size: 10 } },
+                            grid: { color: gridColor }
+                        },
+                        y: {
+                            ticks: { color: textColor, font: { size: 11 } },
+                            grid: { color: gridColor }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateWindRose() {
+            const ctx = document.getElementById("windRoseChart").getContext("2d");
+            const isDark = document.documentElement.classList.contains("dark");
+            const textColor = isDark ? "#cbd5e1" : "#334155";
+            const gridColor = isDark ? "rgba(148, 163, 184, 0.18)" : "rgba(15, 23, 42, 0.12)";
+
+            if (windRoseInstance) windRoseInstance.destroy();
+
+            const sectors = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+            const counts = new Array(16).fill(0);
+            const speedSums = new Array(16).fill(0);
+            let totalValid = 0;
+
+            globalDataset.forEach(r => {
+                if (r.winddir !== null && !isNaN(r.winddir) && (r.windSpeed === null || r.windSpeed > 0.2)) {
+                    const idx = Math.floor((r.winddir / 22.5) + 0.5) % 16;
+                    counts[idx]++;
+                    speedSums[idx] += (r.windSpeed || 0);
+                    totalValid++;
+                }
+            });
+
+            const freqPct = counts.map(c => totalValid > 0 ? Number(((c / totalValid) * 100).toFixed(1)) : 0);
+            const avgSpeeds = counts.map((c, i) => c > 0 ? Number((speedSums[i] / c).toFixed(1)) : 0);
+
+            let maxIdx = 0;
+            freqPct.forEach((v, i) => { if (v > freqPct[maxIdx]) maxIdx = i; });
+            document.getElementById("prevailingDir").textContent = totalValid > 0
+                ? `${sectors[maxIdx]} (${freqPct[maxIdx]}% freq, avg ${avgSpeeds[maxIdx]} km/h)`
+                : "Calm / Insufficient Data";
+
+            windRoseInstance = new Chart(ctx, {
+                type: 'polarArea',
+                data: {
+                    labels: sectors,
+                    datasets: [{
+                        label: 'Directional Frequency (%)',
+                        data: freqPct,
+                        backgroundColor: sectors.map((_, i) => `hsla(${195 + (i * 8)}, 80%, 50%, 0.65)`),
+                        borderColor: isDark ? "#0f172a" : "#ffffff",
+                        borderWidth: 1.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { display: true, color: gridColor },
+                            grid: { color: gridColor },
+                            pointLabels: { display: true, centerPointLabels: true, font: { size: 10, weight: 'bold' }, color: textColor },
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (item) => {
+                                    const idx = item.dataIndex;
+                                    return `${sectors[idx]}: ${freqPct[idx]}% of time | Mean Speed: ${avgSpeeds[idx]} km/h`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById("dataTableBody");
+            tbody.innerHTML = "";
+            const preview = [...globalDataset].reverse().slice(0, 150);
+
+            preview.forEach(r => {
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-100 dark:hover:bg-slate-800/50 transition";
+                tr.innerHTML = `
+                    <td class="p-2.5 font-mono text-slate-500 dark:text-slate-400">${r.timeLocal}</td>
+                    <td class="p-2.5 font-bold">${r.stationName}</td>
+                    <td class="p-2.5 font-semibold">${r.temp ?? '--'}</td>
+                    <td class="p-2.5 text-rose-500">${r.tempHigh ?? '--'}</td>
+                    <td class="p-2.5 text-cyan-500">${r.tempLow ?? '--'}</td>
+                    <td class="p-2.5">${r.humidity ?? '--'}</td>
+                    <td class="p-2.5 text-blue-600 dark:text-blue-400 font-bold">${r.precipTotal ?? '0'}</td>
+                    <td class="p-2.5">${r.windSpeed ?? '--'}</td>
+                    <td class="p-2.5">${r.windGust ?? '--'}</td>
+                    <td class="p-2.5">${r.winddir ?? '--'}° (${degToCompass(r.winddir)})</td>
+                    <td class="p-2.5">${r.pressure ?? '--'}</td>
+                    <td class="p-2.5">${r.uv ?? '--'} / ${r.solarRadiation ?? '--'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ============================================================================
+        // EXPORT HIGH-RESOLUTION CHART / WIND ROSE AS PNG WITH UNIVERSITY TITLE BANNER
+        // ============================================================================
+        function exportChartImage(canvasId, filePrefix) {
+            const sourceCanvas = document.getElementById(canvasId);
+            if (!sourceCanvas) return;
+
+            const isDark = document.documentElement.classList.contains("dark");
+            const bannerHeight = 82;
+            const padding = 20;
+
+            const outCanvas = document.createElement("canvas");
+            outCanvas.width = sourceCanvas.width + padding * 2;
+            outCanvas.height = sourceCanvas.height + bannerHeight + padding;
+            const ctx = outCanvas.getContext("2d");
+
+            ctx.fillStyle = isDark ? "#0f172a" : "#ffffff";
+            ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
+
+            ctx.fillStyle = isDark ? "#f8fafc" : "#0f172a";
+            ctx.font = "bold 16px Inter, sans-serif";
+            ctx.fillText("Meteorological Center — University of Sulaimani (College of Science)", padding, 28);
+
+            const stSelect = document.getElementById("stationSelect");
+            const stationText = stSelect.options[stSelect.selectedIndex].text;
+            const paramSelect = document.getElementById("paramSelect");
+            const paramText = canvasId === "weatherChart" ? paramSelect.options[paramSelect.selectedIndex].text : "16-Sector Wind Rose Diagram";
+            const sDate = document.getElementById("startDate").value;
+            const eDate = document.getElementById("endDate").value;
+
+            ctx.fillStyle = isDark ? "#38bdf8" : "#2563eb";
+            ctx.font = "bold 13px Inter, sans-serif";
+            ctx.fillText(`${stationText}  |  ${paramText}`, padding, 50);
+
+            ctx.fillStyle = isDark ? "#94a3b8" : "#64748b";
+            ctx.font = "11px Inter, sans-serif";
+            ctx.fillText(`Period: ${sDate} to ${eDate} (${currentInterval.toUpperCase()} interval)  •  Developed by Hawber Ata`, padding, 68);
+
+            ctx.drawImage(sourceCanvas, padding, bannerHeight);
+
+            const link = document.createElement("a");
+            link.download = `UOS_${filePrefix}_${stSelect.value}_${sDate}_to_${eDate}.png`;
+            link.href = outCanvas.toDataURL("image/png", 1.0);
+            link.click();
+        }
+
+        // ============================================================================
+        // EXPORT MULTI-WORKSHEET EXCEL (.XLSX) WITH UNIVERSITY HEADER & SUMMARY TABLE
+        // ============================================================================
+        function exportToExcel() {
+            if (globalDataset.length === 0) {
+                alert("No telemetry data loaded to export!");
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+            const sDate = document.getElementById("startDate").value;
+            const eDate = document.getElementById("endDate").value;
+            const selected = document.getElementById("stationSelect").value;
+            const exportTimestamp = new Date().toISOString().slice(0, 19).replace("T", " ");
+
+            const calcStationStats = (records) => {
+                const valid = (p) => records.map(r => r[p]).filter(v => v !== null && !isNaN(v));
+                const mean = (arr) => arr.length ? Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2)) : "--";
+                const max = (arr) => arr.length ? Number(Math.max(...arr).toFixed(2)) : "--";
+                const min = (arr) => arr.length ? Number(Math.min(...arr).toFixed(2)) : "--";
+                const sum = (arr) => arr.length ? Number(arr.reduce((a, b) => a + b, 0).toFixed(2)) : 0;
+
+                return {
+                    count: records.length,
+                    tempAvg: mean(valid("temp")),
+                    tempMax: max(valid("tempHigh")),
+                    tempMin: min(valid("tempLow")),
+                    dewAvg: mean(valid("dewpt")),
+                    humAvg: mean(valid("humidity")),
+                    precipSum: sum(valid("precipTotal")),
+                    precipRateMax: max(valid("precipRate")),
+                    windAvg: mean(valid("windSpeed")),
+                    windGustMax: max(valid("windGust")),
+                    windDirAvg: mean(valid("winddir")),
+                    pressAvg: mean(valid("pressure")),
+                    uvMax: max(valid("uv")),
+                    solarMax: max(valid("solarRadiation"))
+                };
+            };
+
+            const stationsToExport = selected === "ALL"
+                ? STATIONS
+                : [STATIONS.find(s => s.id === selected) || STATIONS[0]];
+
+            if (selected === "ALL") {
+                const stationStatsList = [];
+                stationsToExport.forEach(st => {
+                    const stRecords = globalDataset.filter(r => r.stationId === st.id);
+                    if (stRecords.length > 0) {
+                        stationStatsList.push({ st, stats: calcStationStats(stRecords) });
+                    }
+                });
+
+                const arealMeanPrecip = stationStatsList.length > 0
+                    ? Number((stationStatsList.reduce((acc, x) => acc + x.stats.precipSum, 0) / stationStatsList.length).toFixed(2))
+                    : 0;
+
+                const summaryAOA = [
+                    ["METEOROLOGICAL CENTER — UNIVERSITY OF SULAIMANI"],
+                    ["College of Science • Department of Earth Sciences and Petroleum"],
+                    ["MULTI-STATION HYDRO-METEOROLOGICAL NETWORK SUMMARY REPORT"],
+                    [`Date Range: ${sDate} to ${eDate}`, `Sampling Resolution: ${currentInterval.toUpperCase()}`, `Exported: ${exportTimestamp}`, `Prepared by: Hawber Ata`],
+                    [`Areal Mean Precipitation Across Active Network (${stationStatsList.length} Stations): ${arealMeanPrecip} mm`],
+                    [],
+                    [
+                        "Station ID", "Station Name", "Latitude", "Longitude", "Observations Count",
+                        "Mean Temp (°C)", "Max Temp (°C)", "Min Temp (°C)", "Mean Dew Point (°C)",
+                        "Mean Humidity (%)", "Total Precipitation (mm)", "Max Precip Rate (mm/hr)",
+                        "Mean Wind Speed (km/h)", "Max Wind Gust (km/h)", "Mean Wind Dir (°)", "Cardinal Sector",
+                        "Mean Pressure (hPa)", "Max UV Index", "Peak Solar Radiation (W/m²)"
+                    ]
+                ];
+
+                stationStatsList.forEach(({ st, stats }) => {
+                    summaryAOA.push([
+                        st.id, st.name, st.lat, st.lon, stats.count,
+                        stats.tempAvg, stats.tempMax, stats.tempMin, stats.dewAvg,
+                        stats.humAvg, stats.precipSum, stats.precipRateMax,
+                        stats.windAvg, stats.windGustMax, stats.windDirAvg, degToCompass(stats.windDirAvg),
+                        stats.pressAvg, stats.uvMax, stats.solarMax
+                    ]);
+                });
+
+                const summaryWS = XLSX.utils.aoa_to_sheet(summaryAOA);
+                summaryWS["!cols"] = new Array(19).fill({ wch: 18 });
+                XLSX.utils.book_append_sheet(wb, summaryWS, "Network_Summary");
+            }
+
+            stationsToExport.forEach(st => {
+                const stRecords = globalDataset.filter(r => r.stationId === st.id);
+                if (stRecords.length === 0) return;
+
+                const stStats = calcStationStats(stRecords);
+
+                const sheetAOA = [
+                    ["METEOROLOGICAL CENTER — UNIVERSITY OF SULAIMANI"],
+                    ["College of Science • Department of Earth Sciences and Petroleum • Developed by Hawber Ata"],
+                    [`Station Name: ${st.name} (${st.id})`, `Coordinates: ${st.lat}° N, ${st.lon}° E`, `Resolution: ${currentInterval.toUpperCase()}`],
+                    [`Report Period: ${sDate} to ${eDate}`, `Total Logged Intervals: ${stStats.count}`, `Export Timestamp: ${exportTimestamp}`],
+                    [
+                        `Summary Reference -> Mean Temp: ${stStats.tempAvg} °C`,
+                        `Max Temp: ${stStats.tempMax} °C`,
+                        `Min Temp: ${stStats.tempMin} °C`,
+                        `Total Precipitation: ${stStats.precipSum} mm`,
+                        `Mean Wind: ${stStats.windAvg} km/h (Max Gust: ${stStats.windGustMax} km/h)`
+                    ],
+                    [],
+                    [
+                        "Timestamp", "Station ID", "Station Name",
+                        "Temp Avg (°C)", "Temp High (°C)", "Temp Low (°C)", "Dew Point (°C)",
+                        "Relative Humidity (%)", "Interval Precipitation (mm)", "Precip Rate (mm/hr)",
+                        "Wind Speed (km/h)", "Wind Gust (km/h)", "Wind Direction (°)", "Wind Cardinal",
+                        "Barometric Pressure (hPa)", "UV Index", "Solar Radiation (W/m²)"
+                    ]
+                ];
+
+                stRecords.forEach(r => {
+                    sheetAOA.push([
+                        r.timeLocal, r.stationId, r.stationName,
+                        r.temp ?? "", r.tempHigh ?? "", r.tempLow ?? "", r.dewpt ?? "",
+                        r.humidity ?? "", r.precipTotal ?? 0, r.precipRate ?? 0,
+                        r.windSpeed ?? "", r.windGust ?? "", r.winddir ?? "", degToCompass(r.winddir),
+                        r.pressure ?? "", r.uv ?? "", r.solarRadiation ?? ""
+                    ]);
+                });
+
+                const ws = XLSX.utils.aoa_to_sheet(sheetAOA);
+                ws["!cols"] = [
+                    { wch: 18 }, { wch: 12 }, { wch: 20 },
+                    { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 },
+                    { wch: 18 }, { wch: 22 }, { wch: 18 },
+                    { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 14 },
+                    { wch: 20 }, { wch: 12 }, { wch: 20 }
+                ];
+
+                const cleanSheetName = `${st.id}_${st.name.replace(/[:\\/?*\[\]]/g, "")}`.slice(0, 31);
+                XLSX.utils.book_append_sheet(wb, ws, cleanSheetName);
+            });
+
+            const fileName = `UOS_Meteorological_Center_${selected}_${currentInterval}_${sDate}_to_${eDate}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        // ============================================================================
+        // SECONDARY FLAT CSV EXPORT
+        // ============================================================================
+        function exportToCSV() {
+            if (globalDataset.length === 0) {
+                alert("No telemetry data loaded to export!");
+                return;
+            }
+
+            const sDate = document.getElementById("startDate").value;
+            const eDate = document.getElementById("endDate").value;
+            const selected = document.getElementById("stationSelect").value;
+
+            const preamble = [
+                `"METEOROLOGICAL CENTER - UNIVERSITY OF SULAIMANI (COLLEGE OF SCIENCE)"`,
+                `"Department of Earth Sciences and Petroleum | Developed by Hawber Ata"`,
+                `"Station Selection: ${selected}","Date Range: ${sDate} to ${eDate}","Resolution: ${currentInterval.toUpperCase()}"`,
+                `""`
+            ];
+
+            const headers = [
+                "Timestamp", "Station_ID", "Station_Name",
+                "Temp_Avg_C", "Temp_High_C", "Temp_Low_C", "DewPoint_C",
+                "Humidity_Percent", "Interval_Precip_mm", "Precip_Rate_mm_hr",
+                "Wind_Speed_kmh", "Wind_Gust_kmh", "Wind_Direction_Deg", "Wind_Cardinal",
+                "Pressure_hPa", "UV_Index", "Solar_Radiation_Wm2"
+            ];
+
+            const rows = globalDataset.map(r => [
+                `"${r.timeLocal}"`, r.stationId, `"${r.stationName}"`,
+                r.temp ?? "", r.tempHigh ?? "", r.tempLow ?? "", r.dewpt ?? "",
+                r.humidity ?? "", r.precipTotal ?? "", r.precipRate ?? "",
+                r.windSpeed ?? "", r.windGust ?? "", r.winddir ?? "", degToCompass(r.winddir),
+                r.pressure ?? "", r.uv ?? "", r.solarRadiation ?? ""
+            ]);
+
+            const csvContent = preamble.join("\n") + "\n" + headers.join(",") + "\n" + rows.map(e => e.join(",")).join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `UOS_Meteo_${selected}_${currentInterval}_${sDate}_to_${eDate}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
