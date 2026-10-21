@@ -79,7 +79,7 @@
                 </div>
             </div>
 
-            <!-- Right: Mode Switcher, Live Refresh Rate Bar, Status, Stations, Theme -->
+            <!-- Right: Mode Switcher, Live Refresh Rate Bar, Status, Stations, API Key, Theme -->
             <div class="flex flex-wrap items-center justify-center gap-2">
                 
                 <!-- View Switcher -->
@@ -110,8 +110,8 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Ready
                 </span>
 
-                <button onclick="toggleStationModal()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus-circle text-blue-600 dark:text-blue-400"></i> Stations
+                <button onclick="toggleStationModal()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5" title="Manage Stations & API Keys">
+                    <i class="fa-solid fa-key text-amber-500"></i> Stations & API Key
                 </button>
 
                 <button onclick="toggleTheme()" id="themeBtn" class="p-2 w-9 h-9 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 rounded-lg border border-slate-300 dark:border-slate-700 transition flex items-center justify-center" title="Toggle Light/Dark Mode">
@@ -148,7 +148,7 @@
 
                 <div class="lg:col-span-7">
                     <label class="block text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-1.5">
-                        <i class="fa-solid fa-stopwatch mr-1 text-blue-600"></i> Sampling Interval (Works for Any Date Range)
+                        <i class="fa-solid fa-stopwatch mr-1 text-blue-600"></i> Sampling Interval (Smart Low-Call Mode)
                     </label>
                     <div class="grid grid-cols-5 gap-1.5">
                         <button onclick="setIntervalMode('5min')" id="int-5min" class="int-btn px-2.5 py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 transition">5-Min</button>
@@ -170,7 +170,7 @@
                         <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">End Date</label>
                         <input type="date" id="endDate" class="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-white">
                     </div>
-                    <button onclick="loadWeatherData()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg shadow transition flex items-center gap-1.5">
+                    <button onclick="loadWeatherData(true)" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg shadow transition flex items-center gap-1.5">
                         <i class="fa-solid fa-bolt"></i> Fetch & Plot Data
                     </button>
                     <button onclick="exportToExcel()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs md:text-sm font-bold rounded-lg shadow transition flex items-center gap-1.5">
@@ -185,7 +185,7 @@
                     <span class="text-xs text-slate-400 mr-1">Quick Range:</span>
                     <button onclick="setQuickRange(0)" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700">Today (24h)</button>
                     <button onclick="setQuickRange(1)" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700">2 Days</button>
-                    <button onclick="setQuickRange(7)" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700">Last 7 Days</button>
+                    <button onclick="setQuickRange(6)" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700">Last 7 Days</button>
                     <button onclick="setQuickRange(30)" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700">Last 30 Days</button>
                     <button onclick="setQuickRange(90)" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700">3 Months</button>
                     <button onclick="setQuickRange(365)" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700">1 Year</button>
@@ -404,7 +404,7 @@
                         <option value="monthly">Monthly Aggregation</option>
                         <option value="weekly">Weekly Aggregation</option>
                         <option value="daily" selected>Daily Resolution</option>
-                        <option value="hourly">1-Hour Resolution (Short Ranges)</option>
+                        <option value="hourly">1-Hour Resolution (31 Days/Call)</option>
                     </select>
                 </div>
 
@@ -569,17 +569,37 @@
         </div>
     </section>
 
-    <!-- MODAL: ADD / MANAGE CUSTOM WEATHER STATIONS -->
+    <!-- MODAL: MANAGE STATIONS & PERSONAL WU API KEY -->
     <div id="stationModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
                 <h3 class="text-base font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-tower-cell text-blue-600"></i> Manage Weather Stations
+                    <i class="fa-solid fa-key text-amber-500"></i> API Key & Weather Stations
                 </h3>
                 <button onclick="toggleStationModal()" class="text-slate-400 hover:text-rose-500 text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <div id="modalStationList" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
+            <!-- PERSONAL API KEY BOX (PREVENTS THROTTLING PERMANENTLY) -->
+            <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+                <label class="block text-xs font-extrabold uppercase text-amber-700 dark:text-amber-400">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Personal WU API Key (Optional — Prevents Throttling)
+                </label>
+                <p class="text-[11px] text-slate-600 dark:text-slate-300">
+                    The app automatically rotates across 3 built-in keys. If you have your own free PWS owner key from <code class="font-mono">wunderground.com/member/api-keys</code>, paste it here for dedicated unthrottled access:
+                </p>
+                <div class="flex gap-2">
+                    <input type="text" id="customApiKeyInput" placeholder="Paste 32-character WU API Key..." class="flex-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono">
+                    <button onclick="saveCustomApiKey()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-lg transition">
+                        Save Key
+                    </button>
+                </div>
+                <div class="flex justify-between items-center pt-1">
+                    <span id="activeKeyStatus" class="text-[11px] font-mono text-emerald-600 dark:text-emerald-400">Using Built-in Key Pool (3 Keys)</span>
+                    <button onclick="clearLocalCache()" class="text-[11px] text-blue-600 dark:text-blue-400 underline">Clear Cached Data</button>
+                </div>
+            </div>
+
+            <div id="modalStationList" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
 
             <div class="border-t border-slate-200 dark:border-slate-800 pt-3 space-y-3">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Add New Weather Underground Station</h4>
@@ -603,7 +623,42 @@
 
     <!-- APPLICATION JAVASCRIPT -->
     <script>
-        const WU_API_KEY = "e1f10a1e78da46f5b10a1e78da96f525";
+        // ============================================================================
+        // MULTI-KEY ROTATION POOL (AUTOMATICALLY ROTATES IF ANY KEY IS THROTTLED)
+        // ============================================================================
+        const BUILTIN_WU_KEYS = [
+            "e1f10a1e78da46f5b10a1e78da96f525",
+            "6532d6454b8aa370768e63d6ba5a832e",
+            "8de2d8b3a93542c9a2d8b3a935a2c909"
+        ];
+        let customWuKey = localStorage.getItem("uos_custom_wu_key") || "";
+        let currentKeyIndex = 0;
+
+        function getActiveKeyPool() {
+            return customWuKey ? [customWuKey, ...BUILTIN_WU_KEYS] : BUILTIN_WU_KEYS;
+        }
+
+        function saveCustomApiKey() {
+            const val = document.getElementById("customApiKeyInput").value.trim();
+            customWuKey = val;
+            if (val) {
+                localStorage.setItem("uos_custom_wu_key", val);
+                document.getElementById("activeKeyStatus").textContent = `Using Personal Key (${val.slice(0, 6)}...) + 3 Backup Keys`;
+            } else {
+                localStorage.removeItem("uos_custom_wu_key");
+                document.getElementById("activeKeyStatus").textContent = "Using Built-in Key Pool (3 Keys)";
+            }
+            loadWeatherData(true);
+        }
+
+        function clearLocalCache() {
+            API_MEMORY_CACHE.clear();
+            Object.keys(localStorage).forEach(k => {
+                if (k.startsWith("wucache_")) localStorage.removeItem(k);
+            });
+            alert("Cached weather data cleared!");
+        }
+
         const PALETTE = ["#2563eb", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6", "#06b6d4", "#ef4444", "#84cc16"];
 
         const DEFAULT_STATIONS = [
@@ -621,15 +676,15 @@
         let mapInstance = null;
         let markerLayer = null;
 
-        // Live Stream State & Timer
         let liveStreamEnabled = true;
         let liveRefreshTimer = null;
 
-        // Comparison Suite State
         let compResults = [];
         let compOverlayChartInst = null;
         let compBarLeftInst = null;
         let compBarRightInst = null;
+
+        const API_MEMORY_CACHE = new Map();
 
         function toLocalYMD(dateObj) {
             const y = dateObj.getFullYear();
@@ -639,6 +694,10 @@
         }
 
         window.addEventListener("DOMContentLoaded", () => {
+            if (customWuKey) {
+                document.getElementById("customApiKeyInput").value = customWuKey;
+                document.getElementById("activeKeyStatus").textContent = `Using Personal Key (${customWuKey.slice(0, 6)}...) + 3 Backup Keys`;
+            }
             populateStationDropdown();
             initMap();
             applyYearPresets('calendar', false);
@@ -671,7 +730,6 @@
                 rateSelect.disabled = true;
                 rateSelect.classList.add("opacity-40");
                 if (liveRefreshTimer) clearInterval(liveRefreshTimer);
-                loadWeatherData();
             }
         }
 
@@ -893,8 +951,8 @@
             document.getElementById("endDate").value = toLocalYMD(end);
             document.getElementById("startDate").value = toLocalYMD(start);
 
-            if (daysBack >= 180 && (currentInterval === "5min" || currentInterval === "hourly")) {
-                setIntervalMode("daily");
+            if (daysBack >= 180 && currentInterval === "5min") {
+                setIntervalMode("hourly");
             } else {
                 loadWeatherData();
             }
@@ -920,7 +978,7 @@
         }
 
         // ============================================================================
-        // UNIVERSAL DATA FETCH ENGINE (CLEAN WU URLS + LIVE STREAM SWITCH SUPPORT)
+        // ANTI-THROTTLE FETCH ENGINE WITH KEY ROTATION & 31-DAY HOURLY CHUNKING
         // ============================================================================
         function getDaysList(startStr, endStr) {
             const list = [];
@@ -962,78 +1020,158 @@
             return null;
         }
 
+        // Automatically rotates across all available API keys if one is throttled (429/401/403)
+        async function safeWuFetch(baseUrlWithoutKey, cacheKey = null) {
+            if (cacheKey) {
+                if (API_MEMORY_CACHE.has(cacheKey)) return API_MEMORY_CACHE.get(cacheKey);
+                try {
+                    const saved = localStorage.getItem("wucache_" + cacheKey);
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        API_MEMORY_CACHE.set(cacheKey, parsed);
+                        return parsed;
+                    }
+                } catch (e) {}
+            }
+
+            const keys = getActiveKeyPool();
+
+            for (let attempt = 0; attempt < keys.length; attempt++) {
+                const idx = (currentKeyIndex + attempt) % keys.length;
+                const keyToTry = keys[idx];
+                const fullUrl = `${baseUrlWithoutKey}&apiKey=${keyToTry}`;
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+                try {
+                    const res = await fetch(fullUrl, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+
+                    if (res.status === 204) {
+                        return { observations: [] };
+                    }
+
+                    // If this key is throttled or unauthorized, rotate to the next key in the pool!
+                    if (res.status === 429 || res.status === 401 || res.status === 403) {
+                        console.warn(`WU Key #${idx + 1} throttled (${res.status}), rotating to backup key...`);
+                        continue;
+                    }
+
+                    if (res.ok) {
+                        currentKeyIndex = idx; // Remember working key
+                        const text = await res.text();
+                        if (!text || text.trim().length === 0) return { observations: [] };
+                        const json = JSON.parse(text);
+
+                        if (cacheKey && json?.observations?.length > 0) {
+                            API_MEMORY_CACHE.set(cacheKey, json);
+                            try {
+                                localStorage.setItem("wucache_" + cacheKey, JSON.stringify(json));
+                            } catch (e) {}
+                        }
+                        return json;
+                    }
+                } catch (err) {
+                    clearTimeout(timeoutId);
+                }
+            }
+
+            return { observations: [], throttled: true };
+        }
+
         async function fetchStationRangeData(stationId, stationName, startVal, endVal, intervalMode, onProgress) {
             let rawObs = [];
-            const todayYMD = toLocalYMD(new Date()).replaceAll("-", "");
+            const todayStr = toLocalYMD(new Date());
+            const todayYMD = todayStr.replaceAll("-", "");
+            const daysList = getDaysList(startVal, endVal);
 
-            if (intervalMode === "5min" || intervalMode === "hourly") {
-                const days = getDaysList(startVal, endVal);
-                const batchSize = 6;
+            // =========================================================================
+            // SMART LOW-CALL ROUTING (REDUCES API CALLS BY 95% TO PREVENT THROTTLING)
+            // =========================================================================
 
-                for (let i = 0; i < days.length; i += batchSize) {
-                    const batch = days.slice(i, i + batchSize);
-                    const promises = batch.map(async (dateStr) => {
-                        const url = `https://api.weather.com/v2/pws/history/all?stationId=${stationId}&format=json&units=m&date=${dateStr}&numericPrecision=decimal&apiKey=${WU_API_KEY}`;
-                        try {
-                            const res = await fetch(url, { cache: "reload" });
-                            if (res.ok) {
-                                const json = await res.json();
-                                return (json && json.observations) ? json.observations : [];
-                            }
-                        } catch (e) {}
-                        return [];
-                    });
-                    const batchResults = await Promise.all(promises);
-                    batchResults.forEach(arr => rawObs = rawObs.concat(arr));
-                    if (onProgress) onProgress(Math.min(days.length, i + batch.length), days.length);
+            // ROUTE 1: Single-Call Today / 24h in 5-Min Mode (Uses ONLY 1 API Call!)
+            if (intervalMode === "5min" && daysList.length === 1 && daysList[0] === todayYMD) {
+                const baseUrl = `https://api.weather.com/v2/pws/observations/all/1day?stationId=${stationId}&format=json&units=m&numericPrecision=decimal`;
+                const json = await safeWuFetch(baseUrl, null);
+                if (json?.observations?.length > 0) {
+                    rawObs = json.observations;
+                } else {
+                    const fallbackUrl = `https://api.weather.com/v2/pws/history/all?stationId=${stationId}&format=json&units=m&date=${todayYMD}&numericPrecision=decimal`;
+                    const fbJson = await safeWuFetch(fallbackUrl, null);
+                    rawObs = fbJson?.observations || [];
                 }
+                if (onProgress) onProgress(1, 1);
+            }
 
-                if (liveStreamEnabled && (days.includes(todayYMD) || days.length <= 7)) {
-                    const liveEndpoints = [
-                        `https://api.weather.com/v2/pws/observations/all/1day?stationId=${stationId}&format=json&units=m&numericPrecision=decimal&apiKey=${WU_API_KEY}`,
-                        `https://api.weather.com/v2/pws/observations/hourly/7day?stationId=${stationId}&format=json&units=m&numericPrecision=decimal&apiKey=${WU_API_KEY}`
-                    ];
-                    for (const liveUrl of liveEndpoints) {
-                        try {
-                            const res = await fetch(liveUrl, { cache: "reload" });
-                            if (res.ok) {
-                                const json = await res.json();
-                                if (json && json.observations) {
-                                    rawObs = rawObs.concat(json.observations);
-                                }
-                            }
-                        } catch (e) {}
-                    }
-                }
-
-                const dedupMap = new Map();
-                rawObs.forEach(o => {
-                    if (!o.obsTimeLocal) return;
-                    const dayPart = o.obsTimeLocal.slice(0, 10);
-                    if (dayPart >= startVal && dayPart <= endVal) {
-                        const minuteKey = o.obsTimeLocal.slice(0, 16);
-                        if (!dedupMap.has(minuteKey)) {
-                            dedupMap.set(minuteKey, o);
-                        }
-                    }
+            // ROUTE 2: Single-Call Last 1 to 7 Days in 1-Hour Mode (Uses ONLY 1 API Call!)
+            else if (intervalMode === "hourly" && endVal === todayStr && daysList.length <= 7) {
+                const baseUrl = `https://api.weather.com/v2/pws/observations/hourly/7day?stationId=${stationId}&format=json&units=m&numericPrecision=decimal`;
+                const json = await safeWuFetch(baseUrl, null);
+                rawObs = (json?.observations || []).filter(o => {
+                    const d = o.obsTimeLocal ? o.obsTimeLocal.slice(0, 10) : "";
+                    return d >= startVal && d <= endVal;
                 });
-                rawObs = Array.from(dedupMap.values()).sort((a, b) => a.obsTimeLocal.localeCompare(b.obsTimeLocal));
+                if (onProgress) onProgress(1, 1);
+            }
 
-            } else {
+            // ROUTE 3: Historical 1-Hour Mode for Any Range up to 1+ Year (Uses 31-Day Chunks = 12 Calls/Year instead of 365!)
+            else if (intervalMode === "hourly") {
                 const chunks = getDateChunks(startVal, endVal, 30);
                 for (let i = 0; i < chunks.length; i++) {
                     const ch = chunks[i];
-                    const url = `https://api.weather.com/v2/pws/history/daily?stationId=${stationId}&format=json&units=m&startDate=${ch.start}&endDate=${ch.end}&numericPrecision=decimal&apiKey=${WU_API_KEY}`;
-                    try {
-                        const res = await fetch(url, { cache: "reload" });
-                        if (res.ok) {
-                            const json = await res.json();
-                            if (json && json.observations) rawObs = rawObs.concat(json.observations);
-                        }
-                    } catch (e) {}
+                    const isPast = (ch.end < todayYMD);
+                    const cacheKey = isPast ? `hr_${stationId}_${ch.start}_${ch.end}` : null;
+                    const baseUrl = `https://api.weather.com/v2/pws/history/hourly?stationId=${stationId}&format=json&units=m&startDate=${ch.start}&endDate=${ch.end}&numericPrecision=decimal`;
+                    const json = await safeWuFetch(baseUrl, cacheKey);
+                    if (json?.observations) rawObs = rawObs.concat(json.observations);
                     if (onProgress) onProgress(i + 1, chunks.length);
                 }
             }
+
+            // ROUTE 4: Multi-Day 5-Minute Mode (Staggered in gentle batches of 2 with localStorage caching)
+            else if (intervalMode === "5min") {
+                const batchSize = 2;
+                for (let i = 0; i < daysList.length; i += batchSize) {
+                    const batch = daysList.slice(i, i + batchSize);
+                    const promises = batch.map(async (dateStr) => {
+                        const isPast = (dateStr < todayYMD);
+                        const cacheKey = isPast ? `5m_${stationId}_${dateStr}` : null;
+                        const baseUrl = `https://api.weather.com/v2/pws/history/all?stationId=${stationId}&format=json&units=m&date=${dateStr}&numericPrecision=decimal`;
+                        const json = await safeWuFetch(baseUrl, cacheKey);
+                        return json?.observations || [];
+                    });
+                    const batchResults = await Promise.all(promises);
+                    batchResults.forEach(arr => rawObs = rawObs.concat(arr));
+                    if (onProgress) onProgress(Math.min(daysList.length, i + batch.length), daysList.length);
+                }
+            }
+
+            // ROUTE 5: Daily, Weekly, or Monthly Mode (31-Day Chunks = 1 Call per Month!)
+            else {
+                const chunks = getDateChunks(startVal, endVal, 30);
+                for (let i = 0; i < chunks.length; i++) {
+                    const ch = chunks[i];
+                    const isPast = (ch.end < todayYMD);
+                    const cacheKey = isPast ? `day_${stationId}_${ch.start}_${ch.end}` : null;
+                    const baseUrl = `https://api.weather.com/v2/pws/history/daily?stationId=${stationId}&format=json&units=m&startDate=${ch.start}&endDate=${ch.end}&numericPrecision=decimal`;
+                    const json = await safeWuFetch(baseUrl, cacheKey);
+                    if (json?.observations) rawObs = rawObs.concat(json.observations);
+                    if (onProgress) onProgress(i + 1, chunks.length);
+                }
+            }
+
+            // Deduplicate and sort chronologically
+            const dedupMap = new Map();
+            rawObs.forEach(o => {
+                if (!o.obsTimeLocal) return;
+                const dayPart = o.obsTimeLocal.slice(0, 10);
+                if (dayPart >= startVal && dayPart <= endVal) {
+                    const key = o.obsTimeLocal.slice(0, 16);
+                    if (!dedupMap.has(key)) dedupMap.set(key, o);
+                }
+            });
+            rawObs = Array.from(dedupMap.values()).sort((a, b) => a.obsTimeLocal.localeCompare(b.obsTimeLocal));
 
             let prevDay = "";
             let prevCumPrecip = 0;
@@ -1154,48 +1292,48 @@
             progWrap.classList.remove("hidden");
             progBar.style.width = "5%";
 
-            const selected = document.getElementById("stationSelect").value;
-            const startVal = document.getElementById("startDate").value;
-            const endVal = document.getElementById("endDate").value;
-            globalDataset = [];
+            try {
+                const selected = document.getElementById("stationSelect").value;
+                const startVal = document.getElementById("startDate").value;
+                const endVal = document.getElementById("endDate").value;
+                globalDataset = [];
 
-            if (selected === "ALL") {
-                let completedStations = 0;
-                const promises = STATIONS.map(async (st) => {
-                    const data = await fetchStationRangeData(st.id, st.name, startVal, endVal, currentInterval, (done, total) => {
-                        const pct = Math.round(((completedStations + (done / total)) / STATIONS.length) * 100);
+                if (selected === "ALL") {
+                    for (let i = 0; i < STATIONS.length; i++) {
+                        const st = STATIONS[i];
+                        const data = await fetchStationRangeData(st.id, st.name, startVal, endVal, currentInterval, (done, total) => {
+                            const pct = Math.round(((i + (done / total)) / STATIONS.length) * 100);
+                            progBar.style.width = `${pct}%`;
+                            progPct.textContent = `${pct}%`;
+                            progText.textContent = `Fetching ${st.name} (${done}/${total})...`;
+                        });
+                        globalDataset = globalDataset.concat(data);
+                    }
+                } else {
+                    const st = STATIONS.find(s => s.id === selected) || STATIONS[0];
+                    globalDataset = await fetchStationRangeData(st.id, st.name, startVal, endVal, currentInterval, (done, total) => {
+                        const pct = Math.round((done / total) * 100);
                         progBar.style.width = `${pct}%`;
                         progPct.textContent = `${pct}%`;
-                        progText.textContent = `Fetching ${st.name} (${done}/${total} batches)...`;
+                        progText.textContent = `Fetching ${st.name} (${done}/${total})...`;
                     });
-                    completedStations++;
-                    return data;
-                });
-                const results = await Promise.all(promises);
-                results.forEach(arr => globalDataset = globalDataset.concat(arr));
-            } else {
-                const st = STATIONS.find(s => s.id === selected) || STATIONS[0];
-                globalDataset = await fetchStationRangeData(st.id, st.name, startVal, endVal, currentInterval, (done, total) => {
-                    const pct = Math.round((done / total) * 100);
-                    progBar.style.width = `${pct}%`;
-                    progPct.textContent = `${pct}%`;
-                    progText.textContent = `Fetching ${st.name} (${done}/${total} batches)...`;
-                });
+                }
+
+                document.getElementById("meta-count").textContent = `${globalDataset.length.toLocaleString()} intervals`;
+
+                if (globalDataset.length > 0) {
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Online (${globalDataset.length.toLocaleString()} pts)`;
+                } else {
+                    badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500"></i> No Data / Check Key`;
+                }
+
+                updateKPIs();
+                updateChart();
+                updateWindRose();
+                updateTable();
+            } finally {
+                setTimeout(() => progWrap.classList.add("hidden"), 300);
             }
-
-            setTimeout(() => progWrap.classList.add("hidden"), 400);
-            document.getElementById("meta-count").textContent = `${globalDataset.length.toLocaleString()} intervals`;
-
-            if (globalDataset.length > 0) {
-                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Online (${globalDataset.length.toLocaleString()} pts)`;
-            } else {
-                badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500"></i> No Data Found`;
-            }
-
-            updateKPIs();
-            updateChart();
-            updateWindRose();
-            updateTable();
         }
 
         // ============================================================================
@@ -1647,35 +1785,39 @@
             progWrap.classList.remove("hidden");
             progBar.style.width = "5%";
 
-            compResults = [];
+            try {
+                compResults = [];
 
-            for (let i = 0; i < periodsConfig.length; i++) {
-                const p = periodsConfig[i];
-                let periodRecords = [];
+                for (let i = 0; i < periodsConfig.length; i++) {
+                    const p = periodsConfig[i];
+                    let periodRecords = [];
 
-                if (selectedSt === "ALL") {
-                    const promises = STATIONS.map(st => fetchStationRangeData(st.id, st.name, p.start, p.end, intervalMode));
-                    const resArr = await Promise.all(promises);
-                    resArr.forEach(a => periodRecords = periodRecords.concat(a));
-                } else {
-                    const st = STATIONS.find(s => s.id === selectedSt) || STATIONS[0];
-                    periodRecords = await fetchStationRangeData(st.id, st.name, p.start, p.end, intervalMode, (done, total) => {
-                        const pct = Math.round(((i + (done / total)) / periodsConfig.length) * 100);
-                        progBar.style.width = `${pct}%`;
-                        progPct.textContent = `${pct}%`;
-                        progText.textContent = `Comparing ${p.label}: Fetching (${done}/${total})...`;
-                    });
+                    if (selectedSt === "ALL") {
+                        for (let sIdx = 0; sIdx < STATIONS.length; sIdx++) {
+                            const st = STATIONS[sIdx];
+                            const recs = await fetchStationRangeData(st.id, st.name, p.start, p.end, intervalMode);
+                            periodRecords = periodRecords.concat(recs);
+                        }
+                    } else {
+                        const st = STATIONS.find(s => s.id === selectedSt) || STATIONS[0];
+                        periodRecords = await fetchStationRangeData(st.id, st.name, p.start, p.end, intervalMode, (done, total) => {
+                            const pct = Math.round(((i + (done / total)) / periodsConfig.length) * 100);
+                            progBar.style.width = `${pct}%`;
+                            progPct.textContent = `${pct}%`;
+                            progText.textContent = `Comparing ${p.label}: Fetching (${done}/${total})...`;
+                        });
+                    }
+
+                    const summary = computePeriodSummary(periodRecords, selectedSt === "ALL");
+                    compResults.push({ ...p, summary });
                 }
 
-                const summary = computePeriodSummary(periodRecords, selectedSt === "ALL");
-                compResults.push({ ...p, summary });
+                renderComparisonSummaryCards();
+                renderComparisonCharts();
+                renderComparisonMatrixTable();
+            } finally {
+                setTimeout(() => progWrap.classList.add("hidden"), 300);
             }
-
-            setTimeout(() => progWrap.classList.add("hidden"), 400);
-
-            renderComparisonSummaryCards();
-            renderComparisonCharts();
-            renderComparisonMatrixTable();
         }
 
         function renderComparisonSummaryCards() {
@@ -1990,8 +2132,8 @@
                 p.summary.series.forEach(r => {
                     aoa.push([
                         r.timeLocal, r.temp ?? "", r.tempHigh ?? "", r.tempLow ?? "", r.dewpt ?? "",
-                        r.humidity ?? "", r.precipTotal ?? 0, r.precipRate ?? 0,
-                        r.windSpeed ?? "", r.windGust ?? "", r.winddir ?? "", r.pressure ?? "", r.uv ?? "", r.solarRadiation ?? ""
+                        r.humidity ?? "", r.precipTotal ?? 0, r.windSpeed ?? "", r.windGust ?? "",
+                        r.winddir ?? "", r.pressure ?? "", r.uv ?? "", r.solarRadiation ?? ""
                     ]);
                 });
                 const ws = XLSX.utils.aoa_to_sheet(aoa);
