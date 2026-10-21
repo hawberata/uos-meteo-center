@@ -79,7 +79,7 @@
                 </div>
             </div>
 
-            <!-- Right: Mode Switcher, Live Refresh Rate Bar, Status, Stations, API Key, Theme -->
+            <!-- Right: Mode Switcher, Live Refresh Rate Bar (DEFAULT OFF), Status, Stations, API Key, Theme -->
             <div class="flex flex-wrap items-center justify-center gap-2">
                 
                 <!-- View Switcher -->
@@ -92,13 +92,13 @@
                     </button>
                 </div>
 
-                <!-- LIVE STREAM TOGGLE & REFRESH INTERVAL SELECTOR -->
+                <!-- LIVE STREAM TOGGLE & REFRESH INTERVAL SELECTOR (STARTS OFF BY DEFAULT) -->
                 <div class="flex items-center bg-slate-200 dark:bg-slate-800 p-1 rounded-xl border border-slate-300 dark:border-slate-700 gap-1">
-                    <button onclick="toggleLiveStream()" id="liveToggleBtn" class="px-3 py-1 rounded-lg text-xs font-extrabold transition flex items-center gap-2 bg-emerald-600 text-white shadow-sm" title="Switch Real-Time Live Stream ON or OFF">
-                        <span id="liveDot" class="w-2 h-2 rounded-full bg-white animate-ping"></span>
-                        <span id="liveToggleText">LIVE: ON</span>
+                    <button onclick="toggleLiveStream()" id="liveToggleBtn" class="px-3 py-1 rounded-lg text-xs font-extrabold transition flex items-center gap-2 bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-400" title="Switch Real-Time Live Stream ON or OFF">
+                        <span id="liveDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+                        <span id="liveToggleText">LIVE: OFF</span>
                     </button>
-                    <select id="liveRefreshRate" onchange="onRefreshRateChange()" class="bg-transparent text-slate-800 dark:text-slate-200 text-xs font-bold px-2 py-1 rounded-lg focus:outline-none cursor-pointer" title="Select Auto-Refresh Interval">
+                    <select id="liveRefreshRate" disabled onchange="onRefreshRateChange()" class="bg-transparent text-slate-800 dark:text-slate-200 text-xs font-bold px-2 py-1 rounded-lg focus:outline-none cursor-pointer opacity-40" title="Select Auto-Refresh Interval">
                         <option value="60000" class="bg-white dark:bg-slate-800">Every 1 Min</option>
                         <option value="300000" selected class="bg-white dark:bg-slate-800">Every 5 Min</option>
                         <option value="900000" class="bg-white dark:bg-slate-800">Every 15 Min</option>
@@ -676,7 +676,8 @@
         let mapInstance = null;
         let markerLayer = null;
 
-        let liveStreamEnabled = true;
+        // Live Stream State & Timer (DEFAULT OFF)
+        let liveStreamEnabled = false;
         let liveRefreshTimer = null;
 
         let compResults = [];
@@ -1052,14 +1053,13 @@
                         return { observations: [] };
                     }
 
-                    // If this key is throttled or unauthorized, rotate to the next key in the pool!
                     if (res.status === 429 || res.status === 401 || res.status === 403) {
                         console.warn(`WU Key #${idx + 1} throttled (${res.status}), rotating to backup key...`);
                         continue;
                     }
 
                     if (res.ok) {
-                        currentKeyIndex = idx; // Remember working key
+                        currentKeyIndex = idx;
                         const text = await res.text();
                         if (!text || text.trim().length === 0) return { observations: [] };
                         const json = JSON.parse(text);
@@ -1086,11 +1086,7 @@
             const todayYMD = todayStr.replaceAll("-", "");
             const daysList = getDaysList(startVal, endVal);
 
-            // =========================================================================
-            // SMART LOW-CALL ROUTING (REDUCES API CALLS BY 95% TO PREVENT THROTTLING)
-            // =========================================================================
-
-            // ROUTE 1: Single-Call Today / 24h in 5-Min Mode (Uses ONLY 1 API Call!)
+            // ROUTE 1: Single-Call Today / 24h in 5-Min Mode (Uses ONLY 1 API Call)
             if (intervalMode === "5min" && daysList.length === 1 && daysList[0] === todayYMD) {
                 const baseUrl = `https://api.weather.com/v2/pws/observations/all/1day?stationId=${stationId}&format=json&units=m&numericPrecision=decimal`;
                 const json = await safeWuFetch(baseUrl, null);
@@ -1104,7 +1100,7 @@
                 if (onProgress) onProgress(1, 1);
             }
 
-            // ROUTE 2: Single-Call Last 1 to 7 Days in 1-Hour Mode (Uses ONLY 1 API Call!)
+            // ROUTE 2: Single-Call Last 1 to 7 Days in 1-Hour Mode (Uses ONLY 1 API Call)
             else if (intervalMode === "hourly" && endVal === todayStr && daysList.length <= 7) {
                 const baseUrl = `https://api.weather.com/v2/pws/observations/hourly/7day?stationId=${stationId}&format=json&units=m&numericPrecision=decimal`;
                 const json = await safeWuFetch(baseUrl, null);
@@ -1115,7 +1111,7 @@
                 if (onProgress) onProgress(1, 1);
             }
 
-            // ROUTE 3: Historical 1-Hour Mode for Any Range up to 1+ Year (Uses 31-Day Chunks = 12 Calls/Year instead of 365!)
+            // ROUTE 3: Historical 1-Hour Mode for Any Range up to 1+ Year (Uses 31-Day Chunks = 12 Calls/Year instead of 365)
             else if (intervalMode === "hourly") {
                 const chunks = getDateChunks(startVal, endVal, 30);
                 for (let i = 0; i < chunks.length; i++) {
@@ -1147,7 +1143,7 @@
                 }
             }
 
-            // ROUTE 5: Daily, Weekly, or Monthly Mode (31-Day Chunks = 1 Call per Month!)
+            // ROUTE 5: Daily, Weekly, or Monthly Mode (31-Day Chunks = 1 Call per Month)
             else {
                 const chunks = getDateChunks(startVal, endVal, 30);
                 for (let i = 0; i < chunks.length; i++) {
