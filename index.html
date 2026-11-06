@@ -24,6 +24,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- SheetJS (xlsx) for Multi-Worksheet Excel Export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF & jsPDF-AutoTable for Multi-Page PDF Reports (Chart + Data Table below) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -254,7 +257,7 @@
                         <h2 class="text-base font-bold flex items-center gap-2">
                             <i class="fa-solid fa-chart-area text-blue-600"></i> Meteorological Parameter Time-Series
                         </h2>
-                        <p id="chartSubtitle" class="text-xs text-slate-500 dark:text-slate-400">1-Hour interval telemetry</p>
+                        <p id="chartSubtitle" class="text-xs text-slate-500 dark:text-slate-400">1-Hour interval telemetry (Summary panel in right margin)</p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
@@ -271,13 +274,16 @@
                             <option value="solarRadiation">🔆 Solar Radiation (W/m²)</option>
                         </select>
 
-                        <button onclick="exportChartImage('weatherChart', 'TimeSeries_Graph')" class="px-3 py-1.5 bg-blue-600/15 hover:bg-blue-600/25 text-blue-700 dark:text-blue-400 border border-blue-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-camera"></i> Save Graph PNG
+                        <button onclick="exportChartImage('weatherChart', 'TimeSeries_Graph', 'png')" class="px-2.5 py-1.5 bg-blue-600/15 hover:bg-blue-600/25 text-blue-700 dark:text-blue-400 border border-blue-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1" title="Export Graph as PNG">
+                            <i class="fa-solid fa-camera"></i> PNG
+                        </button>
+                        <button onclick="exportChartImage('weatherChart', 'TimeSeries_Report', 'pdf')" class="px-2.5 py-1.5 bg-rose-600/15 hover:bg-rose-600/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1" title="Export Full PDF Report (Graph + Data Table Below)">
+                            <i class="fa-solid fa-file-pdf"></i> PDF Report
                         </button>
                     </div>
                 </div>
 
-                <div class="relative w-full h-[380px]">
+                <div class="relative w-full h-[390px]">
                     <canvas id="weatherChart"></canvas>
                 </div>
             </div>
@@ -288,9 +294,14 @@
                         <h2 class="text-base font-bold flex items-center gap-2">
                             <i class="fa-solid fa-compass text-teal-600"></i> Wind Rose Diagram
                         </h2>
-                        <button onclick="exportChartImage('windRoseChart', 'WindRose_Diagram')" class="px-2.5 py-1 bg-teal-600/15 hover:bg-teal-600/25 text-teal-700 dark:text-teal-400 border border-teal-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
-                            <i class="fa-solid fa-camera"></i> Save PNG
-                        </button>
+                        <div class="flex gap-1">
+                            <button onclick="exportChartImage('windRoseChart', 'WindRose_Diagram', 'png')" class="px-2 py-1 bg-teal-600/15 hover:bg-teal-600/25 text-teal-700 dark:text-teal-400 border border-teal-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-camera"></i> PNG
+                            </button>
+                            <button onclick="exportChartImage('windRoseChart', 'WindRose_Report', 'pdf')" class="px-2 py-1 bg-rose-600/15 hover:bg-rose-600/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-file-pdf"></i> PDF
+                            </button>
+                        </div>
                     </div>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">16-Sector Directional Frequency (%) & Mean Speed</p>
                 </div>
@@ -329,7 +340,7 @@
                     <h2 class="text-base font-bold flex items-center gap-2">
                         <i class="fa-solid fa-table text-blue-600"></i> Complete Telemetry Log
                     </h2>
-                    <span class="text-xs text-slate-500 dark:text-slate-400">Showing latest 150 intervals (Click <b>Export Excel</b> for multi-sheet workbook)</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">Showing latest 150 intervals (Click <b>PDF Report</b> or <b>Export Excel</b> for full dataset)</span>
                 </div>
                 <div class="overflow-x-auto max-h-[340px] flex-1 border border-slate-200 dark:border-slate-800 rounded-lg">
                     <table class="w-full text-left border-collapse text-xs">
@@ -510,8 +521,11 @@
                         <option value="uv">☀️ Max UV Index</option>
                         <option value="solarRadiation">🔆 Peak Solar Radiation (W/m²)</option>
                     </select>
-                    <button onclick="exportChartImage('compOverlayChart', 'Comparison_Timeline')" class="px-3 py-1.5 bg-blue-600/15 hover:bg-blue-600/25 text-blue-700 dark:text-blue-400 border border-blue-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-camera"></i> Save PNG
+                    <button onclick="exportChartImage('compOverlayChart', 'Comparison_Timeline', 'png')" class="px-2.5 py-1.5 bg-blue-600/15 hover:bg-blue-600/25 text-blue-700 dark:text-blue-400 border border-blue-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                        <i class="fa-solid fa-camera"></i> PNG
+                    </button>
+                    <button onclick="exportChartImage('compOverlayChart', 'Comparison_Report', 'pdf')" class="px-2.5 py-1.5 bg-rose-600/15 hover:bg-rose-600/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1" title="Export Comparison PDF Report (Graph + Matrix & Data Tables Below)">
+                        <i class="fa-solid fa-file-pdf"></i> PDF Report
                     </button>
                 </div>
             </div>
@@ -519,9 +533,9 @@
             <!-- PAGE 1 -->
             <div id="compPage1" class="space-y-2">
                 <p class="text-xs text-slate-500 dark:text-slate-400">
-                    Synchronized timeline comparing your selected parameter across Period 1 (Blue), Period 2 (Amber), and Period 3 (Emerald).
+                    Synchronized timeline comparing your selected parameter across Period 1 (Blue), Period 2 (Amber), and Period 3 (Emerald) with non-overlapping right-side statistics panel.
                 </p>
-                <div class="relative w-full h-[400px]">
+                <div class="relative w-full h-[410px]">
                     <canvas id="compOverlayChart"></canvas>
                 </div>
             </div>
@@ -532,9 +546,14 @@
                     <p class="text-xs text-slate-500 dark:text-slate-400">
                         Visual comparison of all key extremes and averages side-by-side with distinct color coding per parameter.
                     </p>
-                    <button onclick="exportChartImage('compBarChartLeft', 'Comparison_Parameters_Bar')" class="px-3 py-1 bg-indigo-600/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/30 rounded-lg text-xs font-bold">
-                        <i class="fa-solid fa-camera mr-1"></i> Save Bar Chart PNG
-                    </button>
+                    <div class="flex gap-1.5">
+                        <button onclick="exportChartImage('compBarChartLeft', 'Comparison_Parameters_Bar', 'png')" class="px-3 py-1 bg-indigo-600/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/30 rounded-lg text-xs font-bold">
+                            <i class="fa-solid fa-camera mr-1"></i> PNG
+                        </button>
+                        <button onclick="exportChartImage('compBarChartLeft', 'Comparison_Bar_Report', 'pdf')" class="px-3 py-1 bg-rose-600/15 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold">
+                            <i class="fa-solid fa-file-pdf mr-1"></i> PDF Report
+                        </button>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
@@ -579,7 +598,7 @@
                 <button onclick="toggleStationModal()" class="text-slate-400 hover:text-rose-500 text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <!-- PERSONAL API KEY BOX (PREVENTS THROTTLING PERMANENTLY) -->
+            <!-- PERSONAL API KEY BOX -->
             <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
                 <label class="block text-xs font-extrabold uppercase text-amber-700 dark:text-amber-400">
                     <i class="fa-solid fa-shield-halved mr-1"></i> Personal WU API Key (Optional — Prevents Throttling)
@@ -624,7 +643,99 @@
     <!-- APPLICATION JAVASCRIPT -->
     <script>
         // ============================================================================
-        // MULTI-KEY ROTATION POOL (AUTOMATICALLY ROTATES IF ANY KEY IS THROTTLED)
+        // PARAMETER METADATA & CUSTOM RIGHT-MARGIN SUMMARY PANEL PLUGIN (NO OVERLAP!)
+        // ============================================================================
+        const PARAM_META = {
+            temp:           { name: "Temperature",         unit: "°C" },
+            tempHigh:       { name: "Max Temperature",     unit: "°C" },
+            tempLow:        { name: "Min Temperature",     unit: "°C" },
+            precipTotal:    { name: "Precipitation",       unit: "mm" },
+            precipRate:     { name: "Precipitation Rate",  unit: "mm/hr" },
+            humidity:       { name: "Relative Humidity",   unit: "%" },
+            dewpt:          { name: "Dew Point",           unit: "°C" },
+            windSpeed:      { name: "Wind Speed",          unit: "km/h" },
+            windGust:       { name: "Wind Gust",           unit: "km/h" },
+            winddir:        { name: "Wind Direction",      unit: "°" },
+            pressure:       { name: "Barometric Pressure", unit: "hPa" },
+            uv:             { name: "UV Index",            unit: "" },
+            solarRadiation: { name: "Solar Radiation",     unit: "W/m²" }
+        };
+
+        // Custom Chart.js Plugin: Draws the Statistical Summary Box in the dedicated RIGHT MARGIN
+        // (chartArea.right + 12) so it NEVER covers or overlaps the plotted lines or bars!
+        const sideStatsPanelPlugin = {
+            id: 'sideStatsPanel',
+            afterDraw(chart) {
+                const cfg = chart.options.plugins?.sideStatsPanel;
+                if (!cfg || !cfg.lines || cfg.lines.length === 0) return;
+
+                const { ctx, chartArea } = chart;
+                if (!chartArea) return;
+
+                // If canvas is too narrow (e.g. small mobile screen where right margin is disabled), skip side box
+                const rightSpace = chart.width - chartArea.right;
+                if (rightSpace < 140) return;
+
+                const isDark = document.documentElement.classList.contains("dark");
+                const padding = 10;
+                const lineHeight = 16;
+                const boxWidth = rightSpace - 16;
+                const x = chartArea.right + 10;
+                const y = chartArea.top;
+
+                ctx.save();
+
+                // Measure & wrap lines if needed so text fits inside boxWidth
+                const wrappedLines = [];
+                cfg.lines.forEach((item, idx) => {
+                    const text = typeof item === "string" ? item : item.text;
+                    const color = typeof item === "object" && item.color ? item.color : (idx === 0 ? (isDark ? "#38bdf8" : "#1d4ed8") : (isDark ? "#e2e8f0" : "#1e293b"));
+                    const bold = idx === 0 || (typeof item === "object" && item.bold);
+                    wrappedLines.push({ text, color, bold, isDivider: item.divider || false });
+                });
+
+                const boxHeight = Math.min(chartArea.bottom - chartArea.top, padding * 2 + wrappedLines.length * lineHeight + 6);
+
+                // Card background in the dedicated right margin outside the plot grid
+                ctx.fillStyle = isDark ? "rgba(15, 23, 42, 0.95)" : "rgba(248, 250, 252, 0.98)";
+                ctx.strokeStyle = isDark ? "rgba(56, 189, 248, 0.45)" : "rgba(37, 99, 235, 0.35)";
+                ctx.lineWidth = 1.5;
+
+                ctx.beginPath();
+                if (ctx.roundRect) {
+                    ctx.roundRect(x, y, boxWidth, boxHeight, 8);
+                } else {
+                    ctx.rect(x, y, boxWidth, boxHeight);
+                }
+                ctx.fill();
+                ctx.stroke();
+
+                // Render each statistical line
+                wrappedLines.forEach((lineObj, i) => {
+                    const ty = y + padding + 11 + (i * lineHeight);
+                    if (ty > y + boxHeight - 6) return;
+                    if (lineObj.isDivider) {
+                        ctx.strokeStyle = isDark ? "rgba(148, 163, 184, 0.2)" : "rgba(148, 163, 184, 0.35)";
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(x + 8, ty - 5);
+                        ctx.lineTo(x + boxWidth - 8, ty - 5);
+                        ctx.stroke();
+                        return;
+                    }
+                    ctx.font = lineObj.bold ? "bold 11px Inter, sans-serif" : "600 10.5px Inter, sans-serif";
+                    ctx.fillStyle = lineObj.color;
+                    ctx.fillText(lineObj.text, x + padding, ty, boxWidth - padding * 2);
+                });
+
+                ctx.restore();
+            }
+        };
+
+        Chart.register(sideStatsPanelPlugin);
+
+        // ============================================================================
+        // MULTI-KEY ROTATION POOL
         // ============================================================================
         const BUILTIN_WU_KEYS = [
             "e1f10a1e78da46f5b10a1e78da96f525",
@@ -676,7 +787,6 @@
         let mapInstance = null;
         let markerLayer = null;
 
-        // Live Stream State & Timer (DEFAULT OFF)
         let liveStreamEnabled = false;
         let liveRefreshTimer = null;
 
@@ -940,7 +1050,7 @@
             currentInterval = mode;
             document.querySelectorAll(".int-btn").forEach(b => b.classList.remove("active-btn"));
             document.getElementById(`int-${mode}`).classList.add("active-btn");
-            document.getElementById("chartSubtitle").textContent = `Showing ${mode.toUpperCase()} interval telemetry`;
+            document.getElementById("chartSubtitle").textContent = `Showing ${mode.toUpperCase()} interval telemetry (Summary panel in right margin)`;
             loadWeatherData();
         }
 
@@ -1021,7 +1131,6 @@
             return null;
         }
 
-        // Automatically rotates across all available API keys if one is throttled (429/401/403)
         async function safeWuFetch(baseUrlWithoutKey, cacheKey = null) {
             if (cacheKey) {
                 if (API_MEMORY_CACHE.has(cacheKey)) return API_MEMORY_CACHE.get(cacheKey);
@@ -1086,7 +1195,6 @@
             const todayYMD = todayStr.replaceAll("-", "");
             const daysList = getDaysList(startVal, endVal);
 
-            // ROUTE 1: Single-Call Today / 24h in 5-Min Mode (Uses ONLY 1 API Call)
             if (intervalMode === "5min" && daysList.length === 1 && daysList[0] === todayYMD) {
                 const baseUrl = `https://api.weather.com/v2/pws/observations/all/1day?stationId=${stationId}&format=json&units=m&numericPrecision=decimal`;
                 const json = await safeWuFetch(baseUrl, null);
@@ -1098,10 +1206,7 @@
                     rawObs = fbJson?.observations || [];
                 }
                 if (onProgress) onProgress(1, 1);
-            }
-
-            // ROUTE 2: Single-Call Last 1 to 7 Days in 1-Hour Mode (Uses ONLY 1 API Call)
-            else if (intervalMode === "hourly" && endVal === todayStr && daysList.length <= 7) {
+            } else if (intervalMode === "hourly" && endVal === todayStr && daysList.length <= 7) {
                 const baseUrl = `https://api.weather.com/v2/pws/observations/hourly/7day?stationId=${stationId}&format=json&units=m&numericPrecision=decimal`;
                 const json = await safeWuFetch(baseUrl, null);
                 rawObs = (json?.observations || []).filter(o => {
@@ -1109,10 +1214,7 @@
                     return d >= startVal && d <= endVal;
                 });
                 if (onProgress) onProgress(1, 1);
-            }
-
-            // ROUTE 3: Historical 1-Hour Mode for Any Range up to 1+ Year (Uses 31-Day Chunks = 12 Calls/Year instead of 365)
-            else if (intervalMode === "hourly") {
+            } else if (intervalMode === "hourly") {
                 const chunks = getDateChunks(startVal, endVal, 30);
                 for (let i = 0; i < chunks.length; i++) {
                     const ch = chunks[i];
@@ -1123,10 +1225,7 @@
                     if (json?.observations) rawObs = rawObs.concat(json.observations);
                     if (onProgress) onProgress(i + 1, chunks.length);
                 }
-            }
-
-            // ROUTE 4: Multi-Day 5-Minute Mode (Staggered in gentle batches of 2 with localStorage caching)
-            else if (intervalMode === "5min") {
+            } else if (intervalMode === "5min") {
                 const batchSize = 2;
                 for (let i = 0; i < daysList.length; i += batchSize) {
                     const batch = daysList.slice(i, i + batchSize);
@@ -1141,10 +1240,7 @@
                     batchResults.forEach(arr => rawObs = rawObs.concat(arr));
                     if (onProgress) onProgress(Math.min(daysList.length, i + batch.length), daysList.length);
                 }
-            }
-
-            // ROUTE 5: Daily, Weekly, or Monthly Mode (31-Day Chunks = 1 Call per Month)
-            else {
+            } else {
                 const chunks = getDateChunks(startVal, endVal, 30);
                 for (let i = 0; i < chunks.length; i++) {
                     const ch = chunks[i];
@@ -1157,7 +1253,6 @@
                 }
             }
 
-            // Deduplicate and sort chronologically
             const dedupMap = new Map();
             rawObs.forEach(o => {
                 if (!o.obsTimeLocal) return;
@@ -1333,7 +1428,7 @@
         }
 
         // ============================================================================
-        // DASHBOARD KPI CARDS & CHARTS
+        // DASHBOARD KPI CARDS & CHARTS (WITH NON-OVERLAPPING RIGHT SUMMARY PANEL)
         // ============================================================================
         function degToCompass(num) {
             if (num === null || isNaN(num)) return "--";
@@ -1417,6 +1512,7 @@
         function updateChart() {
             const ctx = document.getElementById("weatherChart").getContext("2d");
             const param = document.getElementById("paramSelect").value;
+            const pMeta = PARAM_META[param] || { name: param, unit: "" };
             const selectedStation = document.getElementById("stationSelect").value;
             const isDark = document.documentElement.classList.contains("dark");
             const textColor = isDark ? "#cbd5e1" : "#334155";
@@ -1427,15 +1523,44 @@
             const isBar = (param === "precipTotal");
             let datasets = [];
             let labels = [];
+            let sidePanelLines = [];
+
+            const calcStats = (arr, paramKey) => {
+                const vals = arr.map(d => d[paramKey]).filter(v => v !== null && !isNaN(v));
+                if (!vals.length) return { min: "--", max: "--", avg: "--", sum: "0.00" };
+                const sum = vals.reduce((a, b) => a + b, 0);
+                return {
+                    min: Math.min(...vals).toFixed(1),
+                    max: Math.max(...vals).toFixed(1),
+                    avg: (sum / vals.length).toFixed(1),
+                    sum: sum.toFixed(2)
+                };
+            };
 
             if (selectedStation === "ALL") {
                 labels = [...new Set(globalDataset.map(d => d.timeLocal))].sort();
+                sidePanelLines.push({ text: `📊 ${pMeta.name}`, bold: true });
+                sidePanelLines.push({ divider: true });
+
+                let sumPrecipAll = 0;
+                let activeStCount = 0;
+
                 STATIONS.forEach(st => {
                     const stData = globalDataset.filter(d => d.stationId === st.id);
+                    const sStats = calcStats(stData, param);
+                    if (stData.length > 0) {
+                        activeStCount++;
+                        sumPrecipAll += parseFloat(sStats.sum);
+                    }
                     const mapObj = {};
                     stData.forEach(d => mapObj[d.timeLocal] = d[param]);
+
+                    const legDetail = param === "precipTotal"
+                        ? `${st.name} — ${pMeta.name} (Total: ${sStats.sum} mm | Max: ${sStats.max} mm)`
+                        : `${st.name} — ${pMeta.name} (Max: ${sStats.max}${pMeta.unit} | Min: ${sStats.min}${pMeta.unit})`;
+
                     datasets.push({
-                        label: st.name,
+                        label: legDetail,
                         data: labels.map(l => mapObj[l] ?? null),
                         borderColor: st.color,
                         backgroundColor: isBar ? st.color + "AA" : st.color + "22",
@@ -1444,14 +1569,34 @@
                         tension: 0.25,
                         fill: false
                     });
+
+                    sidePanelLines.push({ text: `${st.name}:`, bold: true, color: st.color });
+                    if (param === "precipTotal") {
+                        sidePanelLines.push({ text: `  Total: ${sStats.sum} mm | Max: ${sStats.max} mm` });
+                    } else {
+                        sidePanelLines.push({ text: `  Max: ${sStats.max}${pMeta.unit} | Min: ${sStats.min}${pMeta.unit}` });
+                    }
                 });
+
+                if (param === "precipTotal" && activeStCount > 0) {
+                    const arealMean = (sumPrecipAll / activeStCount).toFixed(2);
+                    sidePanelLines.splice(1, 0, { text: `Areal Mean: ${arealMean} mm`, bold: true, color: "#0284c7" });
+                }
             } else {
                 labels = globalDataset.map(d => d.timeLocal);
                 const st = STATIONS.find(s => s.id === selectedStation) || STATIONS[0];
+                const sStats = calcStats(globalDataset, param);
+
+                sidePanelLines.push({ text: `📊 ${pMeta.name}`, bold: true });
+                sidePanelLines.push({ text: `${st.name}`, color: st.color, bold: true });
+                sidePanelLines.push({ divider: true });
 
                 if (param === "temp") {
+                    const hiStats = calcStats(globalDataset, "tempHigh");
+                    const loStats = calcStats(globalDataset, "tempLow");
+
                     datasets.push({
-                        label: "Max Temp (°C)",
+                        label: `Max Temp (Peak: ${hiStats.max} °C)`,
                         data: globalDataset.map(d => d.tempHigh),
                         borderColor: "#f43f5e",
                         borderWidth: 1.5,
@@ -1460,7 +1605,7 @@
                         fill: false
                     });
                     datasets.push({
-                        label: "Avg Temp (°C)",
+                        label: `Avg Temp (Mean: ${sStats.avg} °C)`,
                         data: globalDataset.map(d => d.temp),
                         borderColor: st.color,
                         backgroundColor: st.color + "20",
@@ -1470,7 +1615,7 @@
                         fill: true
                     });
                     datasets.push({
-                        label: "Min Temp (°C)",
+                        label: `Min Temp (Lowest: ${loStats.min} °C)`,
                         data: globalDataset.map(d => d.tempLow),
                         borderColor: "#06b6d4",
                         borderWidth: 1.5,
@@ -1478,21 +1623,43 @@
                         tension: 0.25,
                         fill: false
                     });
-                } else {
+
+                    sidePanelLines.push({ text: `Max (High): ${hiStats.max} °C`, color: "#e11d48", bold: true });
+                    sidePanelLines.push({ text: `Min (Low):  ${loStats.min} °C`, color: "#0891b2", bold: true });
+                    sidePanelLines.push({ text: `Average:    ${sStats.avg} °C`, bold: true });
+                } else if (param === "precipTotal") {
                     datasets.push({
-                        label: `${st.name} (${param})`,
+                        label: `${st.name} — Precipitation (Total: ${sStats.sum} mm | Max: ${sStats.max} mm | Min: ${sStats.min} mm)`,
                         data: globalDataset.map(d => d[param]),
                         borderColor: st.color,
-                        backgroundColor: isBar ? "#2563eb" : st.color + "25",
+                        backgroundColor: "#2563eb",
+                        borderWidth: 2,
+                        tension: 0.25
+                    });
+
+                    sidePanelLines.push({ text: `Total Precip: ${sStats.sum} mm`, color: "#2563eb", bold: true });
+                    sidePanelLines.push({ text: `Max Interval: ${sStats.max} mm` });
+                    sidePanelLines.push({ text: `Min Interval: ${sStats.min} mm` });
+                } else {
+                    datasets.push({
+                        label: `${st.name} — ${pMeta.name} (Max: ${sStats.max}${pMeta.unit} | Min: ${sStats.min}${pMeta.unit} | Avg: ${sStats.avg}${pMeta.unit})`,
+                        data: globalDataset.map(d => d[param]),
+                        borderColor: st.color,
+                        backgroundColor: st.color + "25",
                         borderWidth: 2,
                         pointRadius: labels.length > 80 ? 0 : 2.5,
                         tension: 0.25,
-                        fill: !isBar
+                        fill: true
                     });
 
+                    sidePanelLines.push({ text: `Maximum: ${sStats.max} ${pMeta.unit}`, color: "#e11d48", bold: true });
+                    sidePanelLines.push({ text: `Minimum: ${sStats.min} ${pMeta.unit}`, color: "#0891b2", bold: true });
+                    sidePanelLines.push({ text: `Average: ${sStats.avg} ${pMeta.unit}`, bold: true });
+
                     if (param === "windSpeed") {
+                        const gustStats = calcStats(globalDataset, "windGust");
                         datasets.push({
-                            label: "Wind Gust (km/h)",
+                            label: `Wind Gust (Peak: ${gustStats.max} km/h | Min: ${gustStats.min} km/h)`,
                             data: globalDataset.map(d => d.windGust),
                             borderColor: "#f43f5e",
                             borderDash: [4, 4],
@@ -1500,9 +1667,14 @@
                             pointRadius: 0,
                             fill: false
                         });
+                        sidePanelLines.push({ divider: true });
+                        sidePanelLines.push({ text: `Peak Gust: ${gustStats.max} km/h`, color: "#e11d48", bold: true });
                     }
                 }
             }
+
+            // Reserve 215px on the right side of the canvas on desktop/tablet so the summary panel never covers the graph!
+            const rightMargin = window.innerWidth < 640 ? 10 : 215;
 
             chartInstance = new Chart(ctx, {
                 type: isBar ? 'bar' : 'line',
@@ -1510,12 +1682,16 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: { right: rightMargin, top: 6 }
+                    },
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: { labels: { color: textColor, font: { size: 11, weight: 'bold' } } }
+                        legend: { labels: { color: textColor, font: { size: 11, weight: 'bold' } } },
+                        sideStatsPanel: { lines: sidePanelLines }
                     },
                     scales: {
-                        x: { ticks: { color: textColor, maxTicksLimit: 10, font: { size: 10 } }, grid: { color: gridColor } },
+                        x: { ticks: { color: textColor, maxTicksLimit: 9, font: { size: 10 } }, grid: { color: gridColor } },
                         y: { ticks: { color: textColor, font: { size: 11 } }, grid: { color: gridColor } }
                     }
                 }
@@ -1904,6 +2080,7 @@
             const textColor = isDark ? "#cbd5e1" : "#334155";
             const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(15, 23, 42, 0.08)";
             const param = document.getElementById("compParamSelect").value;
+            const pMeta = PARAM_META[param] || { name: param, unit: "" };
             const intervalMode = document.getElementById("compIntervalSelect").value;
 
             const ctx1 = document.getElementById("compOverlayChart").getContext("2d");
@@ -1926,16 +2103,45 @@
                 return `Interval ${idx + 1}`;
             });
 
-            const overlayDatasets = compResults.map(p => ({
-                label: `${p.label} (${p.start} to ${p.end})`,
-                data: p.summary.series.map(r => r[param]),
-                borderColor: p.color,
-                backgroundColor: param === "precipTotal" ? p.color + "BB" : p.color + "22",
-                borderWidth: 2.5,
-                pointRadius: maxLen > 60 ? 0 : 3,
-                tension: 0.25,
-                fill: param !== "precipTotal"
-            }));
+            const compSideLines = [
+                { text: `📊 ${pMeta.name}`, bold: true },
+                { divider: true }
+            ];
+
+            // Build Descriptive Legends (with Parameter Name + Max/Min or Total Precip) + Right Margin Summary Box
+            const overlayDatasets = compResults.map(p => {
+                const vals = p.summary.series.map(r => r[param]).filter(v => v !== null && !isNaN(v));
+                const maxV = vals.length ? Math.max(...vals).toFixed(1) : "--";
+                const minV = vals.length ? Math.min(...vals).toFixed(1) : "--";
+                const avgV = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : "--";
+                const totP = (p.summary.precipTotal ?? 0).toFixed(2);
+
+                let legendLabel = "";
+                compSideLines.push({ text: `${p.label}:`, color: p.color, bold: true });
+
+                if (param === "precipTotal") {
+                    legendLabel = `${p.label} — ${pMeta.name} (Total: ${totP} mm | Max: ${maxV} mm)`;
+                    compSideLines.push({ text: `  Total: ${totP} mm` });
+                    compSideLines.push({ text: `  Max: ${maxV} mm | Min: ${minV} mm` });
+                } else {
+                    legendLabel = `${p.label} — ${pMeta.name} (Max: ${maxV}${pMeta.unit} | Min: ${minV}${pMeta.unit} | Avg: ${avgV}${pMeta.unit})`;
+                    compSideLines.push({ text: `  Max: ${maxV}${pMeta.unit} | Min: ${minV}${pMeta.unit}` });
+                    compSideLines.push({ text: `  Avg: ${avgV}${pMeta.unit}` });
+                }
+
+                return {
+                    label: legendLabel,
+                    data: p.summary.series.map(r => r[param]),
+                    borderColor: p.color,
+                    backgroundColor: param === "precipTotal" ? p.color + "BB" : p.color + "22",
+                    borderWidth: 2.5,
+                    pointRadius: maxLen > 60 ? 0 : 3,
+                    tension: 0.25,
+                    fill: param !== "precipTotal"
+                };
+            });
+
+            const rightMargin = window.innerWidth < 640 ? 10 : 225;
 
             compOverlayChartInst = new Chart(ctx1, {
                 type: param === "precipTotal" ? "bar" : "line",
@@ -1943,9 +2149,13 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: { right: rightMargin, top: 6 }
+                    },
                     interaction: { mode: "index", intersect: false },
                     plugins: {
-                        legend: { labels: { color: textColor, font: { size: 12, weight: "bold" } } }
+                        legend: { labels: { color: textColor, font: { size: 11, weight: "bold" } } },
+                        sideStatsPanel: { lines: compSideLines }
                     },
                     scales: {
                         x: { ticks: { color: textColor, maxTicksLimit: 12 }, grid: { color: gridColor } },
@@ -1954,6 +2164,7 @@
                 }
             });
 
+            // Page 2 Bar Charts
             const ctxLeft = document.getElementById("compBarChartLeft").getContext("2d");
             const ctxRight = document.getElementById("compBarChartRight").getContext("2d");
             if (compBarLeftInst) compBarLeftInst.destroy();
@@ -2070,6 +2281,281 @@
             });
         }
 
+        // ============================================================================
+        // EXPORT PNG OR FULL MULTI-PAGE PDF REPORT (CHART + DATA TABLE BELOW!)
+        // ============================================================================
+        function exportChartImage(canvasId, filePrefix, format = 'png') {
+            const sourceCanvas = document.getElementById(canvasId);
+            if (!sourceCanvas) return;
+
+            const isComp = canvasId.startsWith("comp");
+            const isDark = document.documentElement.classList.contains("dark");
+            const bannerHeight = 82;
+            const padding = 20;
+
+            const outCanvas = document.createElement("canvas");
+            outCanvas.width = sourceCanvas.width + padding * 2;
+            outCanvas.height = sourceCanvas.height + bannerHeight + padding;
+            const ctx = outCanvas.getContext("2d");
+
+            ctx.fillStyle = isDark ? "#0f172a" : "#ffffff";
+            ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
+
+            ctx.fillStyle = isDark ? "#f8fafc" : "#0f172a";
+            ctx.font = "bold 16px Inter, sans-serif";
+            ctx.fillText("Meteorological Center — University of Sulaimani (College of Science)", padding, 28);
+
+            const stSelect = document.getElementById(isComp ? "compStationSelect" : "stationSelect");
+            const stationText = stSelect.options[stSelect.selectedIndex].text;
+            const paramSelect = document.getElementById(isComp ? "compParamSelect" : "paramSelect");
+
+            let paramText = "Climatic Analytics Diagram";
+            if (canvasId === "weatherChart" || canvasId === "compOverlayChart") {
+                paramText = paramSelect.options[paramSelect.selectedIndex].text;
+            } else if (canvasId === "windRoseChart") {
+                paramText = "16-Sector Wind Rose Diagram";
+            }
+
+            const sDate = document.getElementById("startDate").value;
+            const eDate = document.getElementById("endDate").value;
+            const periodLabel = isComp
+                ? compResults.map(p => `${p.label} (${p.start} to ${p.end})`).join("  vs  ")
+                : `Period: ${sDate} to ${eDate} (${currentInterval.toUpperCase()} interval)`;
+
+            ctx.fillStyle = isDark ? "#38bdf8" : "#2563eb";
+            ctx.font = "bold 13px Inter, sans-serif";
+            ctx.fillText(`${stationText}  |  ${paramText}`, padding, 50);
+
+            ctx.fillStyle = isDark ? "#94a3b8" : "#64748b";
+            ctx.font = "11px Inter, sans-serif";
+            ctx.fillText(`${periodLabel}  •  Developed by Hawber Ata`, padding, 68);
+
+            ctx.drawImage(sourceCanvas, padding, bannerHeight);
+            const imgData = outCanvas.toDataURL("image/png", 1.0);
+
+            // CASE 1: PNG IMAGE DOWNLOAD
+            if (format === "png") {
+                const link = document.createElement("a");
+                link.download = `UOS_${filePrefix}_${stSelect.value}_${sDate}_to_${eDate}.png`;
+                link.href = imgData;
+                link.click();
+                return;
+            }
+
+            // CASE 2: FULL MULTI-PAGE SCIENTIFIC PDF REPORT (GRAPH AT TOP + DATA TABLES BELOW)
+            if (format === "pdf" && window.jspdf) {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+                const pageW = pdf.internal.pageSize.getWidth();
+                const pageH = pdf.internal.pageSize.getHeight();
+
+                // Fit chart nicely on upper half of Page 1 so the data table starts right below it!
+                const maxChartH = 105;
+                const aspect = outCanvas.width / outCanvas.height;
+                let drawW = pageW - 20;
+                let drawH = drawW / aspect;
+                if (drawH > maxChartH) {
+                    drawH = maxChartH;
+                    drawW = drawH * aspect;
+                }
+                const drawX = (pageW - drawW) / 2;
+                pdf.addImage(imgData, "PNG", drawX, 10, drawW, drawH);
+
+                let nextY = 10 + drawH + 7;
+
+                if (!isComp) {
+                    // --- MAIN DASHBOARD PDF REPORT: SUMMARY ROW + COMPLETE TELEMETRY TABLE BELOW CHART ---
+                    const valid = (p) => globalDataset.map(r => r[p]).filter(v => v !== null && !isNaN(v));
+                    const mean = (arr) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : "--";
+                    const max = (arr) => arr.length ? Math.max(...arr).toFixed(1) : "--";
+                    const min = (arr) => arr.length ? Math.min(...arr).toFixed(1) : "--";
+
+                    const stMap = {};
+                    globalDataset.forEach(r => {
+                        if (!stMap[r.stationId]) stMap[r.stationId] = 0;
+                        stMap[r.stationId] += (r.precipTotal || 0);
+                    });
+                    const stCount = Object.keys(stMap).length || 1;
+                    const rawSumP = Object.values(stMap).reduce((a, b) => a + b, 0);
+                    const totalP = stSelect.value === "ALL" ? (rawSumP / stCount).toFixed(2) : rawSumP.toFixed(2);
+
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(30, 58, 138);
+                    pdf.text("1. Executive Period Summary Statistics", 10, nextY);
+
+                    pdf.autoTable({
+                        startY: nextY + 2,
+                        margin: { left: 10, right: 10 },
+                        head: [[
+                            "Station / Network", "Period", "Intervals",
+                            "Temp Avg", "Temp Max", "Temp Min",
+                            "Humidity Avg", "Total Precip", "Wind Avg", "Max Gust", "Pressure Avg", "Max UV / Solar"
+                        ]],
+                        body: [[
+                            stationText, `${sDate} to ${eDate} (${currentInterval})`, globalDataset.length,
+                            `${mean(valid("temp"))} °C`, `${max(valid("tempHigh"))} °C`, `${min(valid("tempLow"))} °C`,
+                            `${mean(valid("humidity"))} %`, `${totalP} mm`,
+                            `${mean(valid("windSpeed"))} km/h`, `${max(valid("windGust"))} km/h`,
+                            `${mean(valid("pressure"))} hPa`, `${max(valid("uv"))} / ${max(valid("solarRadiation"))} W/m²`
+                        ]],
+                        styles: { fontSize: 7.5, cellPadding: 2 },
+                        headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' }
+                    });
+
+                    nextY = pdf.lastAutoTable.finalY + 6;
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(30, 58, 138);
+                    pdf.text(`2. Detailed Meteorological Telemetry Data Log (${globalDataset.length} Records)`, 10, nextY);
+
+                    const tableRows = globalDataset.map(r => [
+                        r.timeLocal,
+                        r.stationName,
+                        r.temp ?? "--",
+                        r.tempHigh ?? "--",
+                        r.tempLow ?? "--",
+                        r.dewpt ?? "--",
+                        r.humidity ?? "--",
+                        (r.precipTotal ?? 0).toFixed ? Number(r.precipTotal).toFixed(2) : r.precipTotal,
+                        r.windSpeed ?? "--",
+                        r.windGust ?? "--",
+                        `${r.winddir ?? '--'}° (${degToCompass(r.winddir)})`,
+                        r.pressure ?? "--",
+                        `${r.uv ?? '--'} / ${r.solarRadiation ?? '--'}`
+                    ]);
+
+                    pdf.autoTable({
+                        startY: nextY + 2,
+                        margin: { left: 10, right: 10, bottom: 12 },
+                        head: [[
+                            "Timestamp", "Station", "Temp Avg (°C)", "Temp High (°C)", "Temp Low (°C)",
+                            "Dew Pt (°C)", "Humidity (%)", "Precip (mm)", "Wind (km/h)", "Gust (km/h)",
+                            "Wind Dir", "Pressure (hPa)", "UV / Solar (W/m²)"
+                        ]],
+                        body: tableRows,
+                        styles: { fontSize: 7, cellPadding: 1.6 },
+                        headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: 'bold' },
+                        alternateRowStyles: { fillColor: [241, 245, 249] }
+                    });
+
+                } else {
+                    // --- COMPARISON PDF REPORT: MATRIX TABLE + INTERVAL DATA TABLE BELOW CHART ---
+                    const isThree = compResults.length === 3;
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(30, 58, 138);
+                    pdf.text("1. Multi-Period Climatic Comparison Summary Matrix", 10, nextY);
+
+                    const matrixHead = [[
+                        "Meteorological Parameter",
+                        `${compResults[0].label} (${compResults[0].start} → ${compResults[0].end})`,
+                        `${compResults[1].label} (${compResults[1].start} → ${compResults[1].end})`,
+                        ...(isThree ? [`${compResults[2].label} (${compResults[2].start} → ${compResults[2].end})`] : []),
+                        `Delta (${compResults[0].label} vs ${compResults[1].label})`
+                    ]];
+
+                    const rowsSpec = [
+                        ["Average Temperature (°C)", "tempAvg", "°C"],
+                        ["Maximum Temperature (°C)", "tempMax", "°C"],
+                        ["Minimum Temperature (°C)", "tempMin", "°C"],
+                        ["Mean Dew Point (°C)", "dewAvg", "°C"],
+                        ["Mean Relative Humidity (%)", "humAvg", "%"],
+                        ["Total Accumulated Precipitation (mm)", "precipTotal", "mm"],
+                        ["Maximum Interval Rainfall (mm)", "precipMaxInterval", "mm"],
+                        ["Mean Wind Speed (km/h)", "windAvg", "km/h"],
+                        ["Maximum Wind Gust (km/h)", "windMaxGust", "km/h"],
+                        ["Mean Barometric Pressure (hPa)", "pressAvg", "hPa"],
+                        ["Maximum UV Index", "uvMax", ""],
+                        ["Peak Solar Radiation (W/m²)", "solarMax", "W/m²"]
+                    ];
+
+                    const matrixBody = rowsSpec.map(([label, key, unit]) => {
+                        const v1 = compResults[0].summary[key];
+                        const v2 = compResults[1].summary[key];
+                        const v3 = isThree ? compResults[2].summary[key] : null;
+                        let diffStr = "--";
+                        if (v1 !== null && v2 !== null && !isNaN(v1) && !isNaN(v2)) {
+                            const d = (v1 - v2).toFixed(2);
+                            diffStr = `${d > 0 ? '+' : ''}${d} ${unit}`;
+                        }
+                        return [
+                            label,
+                            `${v1 ?? '--'} ${unit}`,
+                            `${v2 ?? '--'} ${unit}`,
+                            ...(isThree ? [`${v3 ?? '--'} ${unit}`] : []),
+                            diffStr
+                        ];
+                    });
+
+                    pdf.autoTable({
+                        startY: nextY + 2,
+                        margin: { left: 10, right: 10 },
+                        head: matrixHead,
+                        body: matrixBody,
+                        styles: { fontSize: 7.5, cellPadding: 1.8 },
+                        headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' },
+                        alternateRowStyles: { fillColor: [241, 245, 249] }
+                    });
+
+                    // Interval Breakdown Table for Selected Parameter
+                    nextY = pdf.lastAutoTable.finalY + 6;
+                    const maxLen = Math.max(...compResults.map(p => p.summary.series.length), 0);
+                    const pKey = paramSelect.value;
+                    const pMeta = PARAM_META[pKey] || { name: pKey, unit: "" };
+
+                    if (maxLen > 0) {
+                        pdf.setFontSize(10);
+                        pdf.setTextColor(30, 58, 138);
+                        pdf.text(`2. Interval Breakdown Table — ${pMeta.name} (${pMeta.unit})`, 10, nextY);
+
+                        const intervalHead = [[
+                            "Interval #",
+                            ...compResults.flatMap(p => [`${p.label} Date/Time`, `${p.label} ${pMeta.name} (${pMeta.unit})`, `${p.label} Precip (mm)`])
+                        ]];
+
+                        const intervalBody = [];
+                        for (let i = 0; i < maxLen; i++) {
+                            const row = [i + 1];
+                            compResults.forEach(p => {
+                                const rec = p.summary.series[i];
+                                row.push(rec ? rec.timeLocal : "--");
+                                row.push(rec && rec[pKey] !== null ? rec[pKey] : "--");
+                                row.push(rec && rec.precipTotal !== null ? rec.precipTotal : "--");
+                            });
+                            intervalBody.push(row);
+                        }
+
+                        pdf.autoTable({
+                            startY: nextY + 2,
+                            margin: { left: 10, right: 10, bottom: 12 },
+                            head: intervalHead,
+                            body: intervalBody,
+                            styles: { fontSize: 7, cellPadding: 1.6 },
+                            headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: 'bold' },
+                            alternateRowStyles: { fillColor: [241, 245, 249] }
+                        });
+                    }
+                }
+
+                // Add Page Numbers & University Footer to Every Page
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let p = 1; p <= totalPages; p++) {
+                    pdf.setPage(p);
+                    pdf.setFontSize(8);
+                    pdf.setTextColor(100, 116, 139);
+                    pdf.text(
+                        `Meteorological Center — University of Sulaimani (College of Science) • Developed by Hawber Ata • Page ${p} of ${totalPages}`,
+                        pageW / 2,
+                        pageH - 5,
+                        { align: "center" }
+                    );
+                }
+
+                pdf.save(`UOS_${filePrefix}_${stSelect.value}_${sDate}_to_${eDate}.pdf`);
+            }
+        }
+
+        // ============================================================================
+        // EXPORT MULTI-WORKSHEET EXCEL (.XLSX)
+        // ============================================================================
         function exportComparisonExcel() {
             if (compResults.length === 0) {
                 alert("Please run a comparison first!");
@@ -2141,55 +2627,6 @@
             XLSX.writeFile(wb, `UOS_MultiPeriod_Comparison_${compResults.map(p => p.label.replace(/\s+/g, '')).join('_vs_')}.xlsx`);
         }
 
-        // ============================================================================
-        // EXPORT HIGH-RESOLUTION CHART / WIND ROSE AS PNG
-        // ============================================================================
-        function exportChartImage(canvasId, filePrefix) {
-            const sourceCanvas = document.getElementById(canvasId);
-            if (!sourceCanvas) return;
-
-            const isDark = document.documentElement.classList.contains("dark");
-            const bannerHeight = 82;
-            const padding = 20;
-
-            const outCanvas = document.createElement("canvas");
-            outCanvas.width = sourceCanvas.width + padding * 2;
-            outCanvas.height = sourceCanvas.height + bannerHeight + padding;
-            const ctx = outCanvas.getContext("2d");
-
-            ctx.fillStyle = isDark ? "#0f172a" : "#ffffff";
-            ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
-
-            ctx.fillStyle = isDark ? "#f8fafc" : "#0f172a";
-            ctx.font = "bold 16px Inter, sans-serif";
-            ctx.fillText("Meteorological Center — University of Sulaimani (College of Science)", padding, 28);
-
-            const stSelect = document.getElementById("stationSelect");
-            const stationText = stSelect.options[stSelect.selectedIndex].text;
-            const paramSelect = document.getElementById("paramSelect");
-            const paramText = canvasId === "weatherChart" ? paramSelect.options[paramSelect.selectedIndex].text : "Climatic Analytics Diagram";
-            const sDate = document.getElementById("startDate").value;
-            const eDate = document.getElementById("endDate").value;
-
-            ctx.fillStyle = isDark ? "#38bdf8" : "#2563eb";
-            ctx.font = "bold 13px Inter, sans-serif";
-            ctx.fillText(`${stationText}  |  ${paramText}`, padding, 50);
-
-            ctx.fillStyle = isDark ? "#94a3b8" : "#64748b";
-            ctx.font = "11px Inter, sans-serif";
-            ctx.fillText(`Period: ${sDate} to ${eDate} (${currentInterval.toUpperCase()} interval)  •  Developed by Hawber Ata`, padding, 68);
-
-            ctx.drawImage(sourceCanvas, padding, bannerHeight);
-
-            const link = document.createElement("a");
-            link.download = `UOS_${filePrefix}_${stSelect.value}_${sDate}_to_${eDate}.png`;
-            link.href = outCanvas.toDataURL("image/png", 1.0);
-            link.click();
-        }
-
-        // ============================================================================
-        // EXPORT MULTI-WORKSHEET EXCEL (.XLSX) FOR MAIN DASHBOARD
-        // ============================================================================
         function exportToExcel() {
             if (globalDataset.length === 0) {
                 alert("No telemetry data loaded to export!");
