@@ -279,10 +279,10 @@
                         <button onclick="exportChartImage('weatherChart', 'TimeSeries_Graph', 'png')" class="px-2.5 py-1.5 bg-blue-600/15 hover:bg-blue-600/25 text-blue-700 dark:text-blue-400 border border-blue-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1" title="Export Graph as PNG">
                             <i class="fa-solid fa-camera"></i> PNG
                         </button>
-                        <button onclick="exportChartImage('weatherChart', 'SingleParam_Report', 'pdf')" class="px-2.5 py-1.5 bg-rose-600/15 hover:bg-rose-600/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1" title="PDF Type 1: Current Selected Parameter Graph + Data Table Below">
+                        <button onclick="openPdfConfigModal('dashboard', 'single', 'weatherChart', 'SingleParam_Report')" class="px-2.5 py-1.5 bg-rose-600/15 hover:bg-rose-600/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1" title="PDF Type 1: Current Selected Parameter Graph + Configurable Summary & Interval Tables">
                             <i class="fa-solid fa-file-pdf"></i> Current PDF
                         </button>
-                        <button onclick="exportAllParamsGridPDF('dashboard')" class="px-2.5 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center gap-1" title="PDF Type 2: All 9 Parameters in a 3x3 Chart Grid + Data Table Below">
+                        <button onclick="openPdfConfigModal('dashboard', 'grid')" class="px-2.5 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center gap-1" title="PDF Type 2: Choose Parameters for Multi-Chart 3x3 Grid + Configurable Summary & Station-Sorted Interval Tables">
                             <i class="fa-solid fa-table-cells"></i> All-Params 3×3 PDF
                         </button>
                     </div>
@@ -303,7 +303,7 @@
                             <button onclick="exportChartImage('windRoseChart', 'WindRose_Diagram', 'png')" class="px-2 py-1 bg-teal-600/15 hover:bg-teal-600/25 text-teal-700 dark:text-teal-400 border border-teal-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
                                 <i class="fa-solid fa-camera"></i> PNG
                             </button>
-                            <button onclick="exportChartImage('windRoseChart', 'WindRose_Diagram', 'pdf')" class="px-2 py-1 bg-rose-600/15 hover:bg-rose-600/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                            <button onclick="openPdfConfigModal('dashboard', 'single', 'windRoseChart', 'WindRose_Diagram')" class="px-2 py-1 bg-rose-600/15 hover:bg-rose-600/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
                                 <i class="fa-solid fa-file-pdf"></i> PDF
                             </button>
                         </div>
@@ -345,7 +345,28 @@
                     <h2 class="text-base font-bold flex items-center gap-2">
                         <i class="fa-solid fa-table text-blue-600"></i> Complete Telemetry Log
                     </h2>
-                    <span class="text-xs text-slate-500 dark:text-slate-400">Showing latest 150 intervals (Click <b>Export Excel</b> for multi-sheet workbook)</span>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Sort Table:</label>
+                        <select id="liveTableSortKey" onchange="updateTable()" class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-[11px] font-bold">
+                            <option value="timeLocal">Timestamp</option>
+                            <option value="temp">Temp Avg (°C)</option>
+                            <option value="tempHigh">Temp High (°C)</option>
+                            <option value="tempLow">Temp Low (°C)</option>
+                            <option value="precipTotal">Precipitation (mm)</option>
+                            <option value="humidity">Humidity (%)</option>
+                            <option value="windSpeed">Wind Speed (km/h)</option>
+                            <option value="windGust">Wind Gust (km/h)</option>
+                            <option value="pressure">Pressure (hPa)</option>
+                        </select>
+                        <select id="liveTableSortDir" onchange="updateTable()" class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 text-[11px] font-bold">
+                            <option value="desc">Descending</option>
+                            <option value="asc">Ascending</option>
+                        </select>
+                        <label class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-blue-400 cursor-pointer ml-1">
+                            <input type="checkbox" id="liveTableSeparateStations" checked onchange="updateTable()" class="rounded text-blue-600">
+                            Group by Station
+                        </label>
+                    </div>
                 </div>
                 <div class="overflow-x-auto max-h-[340px] flex-1 border border-slate-200 dark:border-slate-800 rounded-lg">
                     <table class="w-full text-left border-collapse text-xs">
@@ -531,10 +552,10 @@
                     <button onclick="exportChartImage('compOverlayChart', 'Comparison_Timeline', 'png')" class="px-2.5 py-1.5 bg-blue-600/15 hover:bg-blue-600/25 text-blue-700 dark:text-blue-400 border border-blue-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
                         <i class="fa-solid fa-camera"></i> PNG
                     </button>
-                    <button onclick="exportChartImage('compOverlayChart', 'Comparison_Single_Report', 'pdf')" class="px-2.5 py-1.5 bg-rose-600/15 hover:bg-rose-600/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1" title="PDF Type 1: Current Selected Parameter Comparison + Matrix Table">
+                    <button onclick="openPdfConfigModal('compare', 'single', 'compOverlayChart', 'Comparison_Single_Report')" class="px-2.5 py-1.5 bg-rose-600/15 hover:bg-rose-600/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1" title="PDF Type 1: Current Selected Parameter Comparison + Matrix & Interval Tables">
                         <i class="fa-solid fa-file-pdf"></i> Current PDF
                     </button>
-                    <button onclick="exportAllParamsGridPDF('compare')" class="px-2.5 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center gap-1" title="PDF Type 2: All 9 Parameters Compared in a 3x3 Grid + Matrix Table">
+                    <button onclick="openPdfConfigModal('compare', 'grid')" class="px-2.5 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center gap-1" title="PDF Type 2: Choose Parameters for Multi-Chart 3x3 Grid + Matrix & Interval Tables">
                         <i class="fa-solid fa-table-cells"></i> All-Params 3×3 PDF
                     </button>
                 </div>
@@ -560,7 +581,7 @@
                         <button onclick="exportChartImage('compBarChartLeft', 'Comparison_Parameters_Bar', 'png')" class="px-3 py-1 bg-indigo-600/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/30 rounded-lg text-xs font-bold">
                             <i class="fa-solid fa-camera mr-1"></i> Save PNG
                         </button>
-                        <button onclick="exportChartImage('compBarChartLeft', 'Comparison_Parameters_Bar', 'pdf')" class="px-3 py-1 bg-rose-600/15 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold">
+                        <button onclick="openPdfConfigModal('compare', 'single', 'compBarChartLeft', 'Comparison_Parameters_Bar')" class="px-3 py-1 bg-rose-600/15 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold">
                             <i class="fa-solid fa-file-pdf mr-1"></i> Save PDF
                         </button>
                     </div>
@@ -597,6 +618,164 @@
             </div>
         </div>
     </section>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL: PDF REPORT CHECKLIST, INTERVAL SUMMARY & STATION SORTING       -->
+    <!-- ===================================================================== -->
+    <div id="pdfConfigModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+                <div>
+                    <h3 class="text-base font-extrabold flex items-center gap-2 text-slate-900 dark:text-white">
+                        <i class="fa-solid fa-file-pdf text-purple-600"></i> Configure PDF Report (Graphs & Interval Parameter Summary)
+                    </h3>
+                    <p id="pdfModalSubtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Select which parameters to display as graphs and configure the interval summary tables (All selected by default).
+                    </p>
+                </div>
+                <button onclick="closePdfConfigModal()" class="text-slate-400 hover:text-rose-500 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- SECTION 1: CHECKLIST OF PARAMETERS TO PRESENT AS GRAPHS -->
+            <div id="pdfGraphChecklistSection" class="p-4 rounded-xl bg-purple-500/5 border border-purple-500/30 space-y-2.5">
+                <div class="flex flex-wrap justify-between items-center gap-2">
+                    <label class="text-xs font-extrabold uppercase tracking-wider text-purple-700 dark:text-purple-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-line"></i> 1. Checklist: Parameters Presented as Graphs (Max 3×3 Grid)
+                    </label>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="togglePdfCheckboxes('pdf-graph-chk', true)" class="px-2 py-0.5 text-[11px] font-bold bg-purple-600/15 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-600/25">Select All</button>
+                        <button type="button" onclick="togglePdfCheckboxes('pdf-graph-chk', false)" class="px-2 py-0.5 text-[11px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded hover:bg-slate-300">Clear All</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-1">
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="temp" checked class="pdf-graph-chk rounded text-purple-600"> 🌡️ Temperature (°C)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="precipTotal" checked class="pdf-graph-chk rounded text-purple-600"> 🌧️ Precipitation (mm)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="humidity" checked class="pdf-graph-chk rounded text-purple-600"> 💦 Humidity (%)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="dewpt" checked class="pdf-graph-chk rounded text-purple-600"> 💧 Dew Point (°C)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="windSpeed" checked class="pdf-graph-chk rounded text-purple-600"> 🌬️ Wind & Gust (km/h)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="winddir" checked class="pdf-graph-chk rounded text-purple-600"> 🧭 Wind Direction (°)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="pressure" checked class="pdf-graph-chk rounded text-purple-600"> ⏲️ Pressure (hPa)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="uv" checked class="pdf-graph-chk rounded text-purple-600"> ☀️ UV Index
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="solarRadiation" checked class="pdf-graph-chk rounded text-purple-600"> 🔆 Solar Rad. (W/m²)
+                    </label>
+                </div>
+            </div>
+
+            <!-- SECTION 2: CHECKLIST OF PARAMETERS FOR SUMMARY & INTERVAL TABLES (DEFAULT ALL ON) -->
+            <div class="p-4 rounded-xl bg-blue-500/5 border border-blue-500/30 space-y-2.5">
+                <div class="flex flex-wrap justify-between items-center gap-2">
+                    <label class="text-xs font-extrabold uppercase tracking-wider text-blue-700 dark:text-blue-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-table-list"></i> 2. Table Columns: Interval Parameter Summary & Log (Default: All)
+                    </label>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="togglePdfCheckboxes('pdf-table-chk', true)" class="px-2 py-0.5 text-[11px] font-bold bg-blue-600/15 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-600/25">Select All</button>
+                        <button type="button" onclick="togglePdfCheckboxes('pdf-table-chk', false)" class="px-2 py-0.5 text-[11px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded hover:bg-slate-300">Clear All</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-1">
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="temp" checked class="pdf-table-chk rounded text-blue-600"> 🌡️ Temp (Avg/Max/Min)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="dewpt" checked class="pdf-table-chk rounded text-blue-600"> 💧 Dew Point (°C)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="humidity" checked class="pdf-table-chk rounded text-blue-600"> 💦 Humidity (%)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="precipTotal" checked class="pdf-table-chk rounded text-blue-600"> 🌧️ Precipitation (mm)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="precipRate" checked class="pdf-table-chk rounded text-blue-600"> ⛈️ Precip Rate (mm/h)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="windSpeed" checked class="pdf-table-chk rounded text-blue-600"> 🌬️ Wind & Gust (km/h)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="winddir" checked class="pdf-table-chk rounded text-blue-600"> 🧭 Wind Direction (°)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="pressure" checked class="pdf-table-chk rounded text-blue-600"> ⏲️ Pressure (hPa)
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-semibold">
+                        <input type="checkbox" value="uvSolar" checked class="pdf-table-chk rounded text-blue-600"> ☀️ UV & Solar (W/m²)
+                    </label>
+                </div>
+            </div>
+
+            <!-- SECTION 3: INTERVAL PARAMETER SORTING & STATION GROUPING -->
+            <div class="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/30 space-y-3">
+                <label class="block text-xs font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                    <i class="fa-solid fa-arrow-down-short-wide mr-1"></i> 3. Interval Table Sorting & Separate Station Grouping
+                </label>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Sort Interval Rows By Parameter:</label>
+                        <select id="pdfSortField" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-bold">
+                            <option value="timeLocal" selected>🕒 Interval Timestamp (Chronological)</option>
+                            <option value="temp">🌡️ Average Temperature (°C)</option>
+                            <option value="tempHigh">🔥 Maximum Temperature (°C)</option>
+                            <option value="tempLow">❄️ Minimum Temperature (°C)</option>
+                            <option value="precipTotal">🌧️ Interval Precipitation (mm)</option>
+                            <option value="precipRate">⛈️ Precipitation Rate (mm/hr)</option>
+                            <option value="humidity">💦 Relative Humidity (%)</option>
+                            <option value="dewpt">💧 Dew Point (°C)</option>
+                            <option value="windSpeed">🌬️ Wind Speed (km/h)</option>
+                            <option value="windGust">💨 Max Wind Gust (km/h)</option>
+                            <option value="pressure">⏲️ Barometric Pressure (hPa)</option>
+                            <option value="uv">☀️ UV Index</option>
+                            <option value="solarRadiation">🔆 Solar Radiation (W/m²)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Sorting Direction (Per Station):</label>
+                        <select id="pdfSortOrder" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-bold">
+                            <option value="asc" selected>⬆️ Ascending (Oldest First / Lowest to Highest)</option>
+                            <option value="desc">⬇️ Descending (Newest First / Highest to Lowest)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs">
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-bold text-emerald-700 dark:text-emerald-300">
+                        <input type="checkbox" id="pdfSeparateStationTables" checked class="rounded text-emerald-600">
+                        Group & Sort Each Station Separately in PDF
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer font-bold text-slate-700 dark:text-slate-300">
+                        <input type="checkbox" id="pdfIncludeIntervalLog" checked class="rounded text-blue-600">
+                        Include Full Interval Parameter Table in PDF
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex justify-end items-center gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <button type="button" onclick="closePdfConfigModal()" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300">
+                    Cancel
+                </button>
+                <button type="button" onclick="confirmAndGeneratePDF()" class="px-5 py-2 rounded-lg text-xs font-extrabold bg-purple-600 hover:bg-purple-500 text-white shadow-lg flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> Generate PDF Report Now
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- MODAL: MANAGE STATIONS & PERSONAL WU API KEY -->
     <div id="stationModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -681,7 +860,6 @@
                 const { ctx, chartArea } = chart;
                 if (!chartArea) return;
 
-                // Place the box in the dedicated right margin (outside chartArea.right) so it NEVER covers the plot!
                 const rightSpace = chart.width - chartArea.right;
                 if (rightSpace < 120) return;
 
@@ -699,7 +877,6 @@
                 const boxY = chartArea.top;
                 const boxHeight = Math.min(chartArea.bottom - chartArea.top, padY * 2 + 18 + (lines.length * lineHeight));
 
-                // Rounded card in dedicated right margin
                 ctx.fillStyle = isDark ? "rgba(15, 23, 42, 0.95)" : "rgba(248, 250, 252, 0.98)";
                 ctx.strokeStyle = isDark ? "rgba(59, 130, 246, 0.45)" : "rgba(37, 99, 235, 0.35)";
                 ctx.lineWidth = 1.5;
@@ -713,12 +890,10 @@
                 ctx.fill();
                 ctx.stroke();
 
-                // Header Title
                 ctx.fillStyle = isDark ? "#93c5fd" : "#1d4ed8";
                 ctx.font = "bold 10.5px Inter, system-ui, sans-serif";
                 ctx.fillText(title, boxX + padX, boxY + padY + 9, boxWidth - padX * 2);
 
-                // Divider line under title
                 ctx.strokeStyle = isDark ? "rgba(148, 163, 184, 0.2)" : "rgba(148, 163, 184, 0.35)";
                 ctx.lineWidth = 1;
                 ctx.beginPath();
@@ -726,7 +901,6 @@
                 ctx.lineTo(boxX + boxWidth - padX, boxY + padY + 14);
                 ctx.stroke();
 
-                // Draw each stat row
                 lines.forEach((item, i) => {
                     const rowY = boxY + padY + 27 + (i * lineHeight);
                     if (rowY > boxY + boxHeight - 5) return;
@@ -804,7 +978,6 @@
         let mapInstance = null;
         let markerLayer = null;
 
-        // Live Stream State & Timer (DEFAULT OFF)
         let liveStreamEnabled = false;
         let liveRefreshTimer = null;
 
@@ -812,6 +985,14 @@
         let compOverlayChartInst = null;
         let compBarLeftInst = null;
         let compBarRightInst = null;
+
+        // Pending PDF Request Context
+        let pendingPdfContext = {
+            mode: "dashboard",     // 'dashboard' or 'compare'
+            reportType: "grid",    // 'grid' or 'single'
+            canvasId: "weatherChart",
+            filePrefix: "Report"
+        };
 
         const API_MEMORY_CACHE = new Map();
 
@@ -1796,12 +1977,51 @@
             });
         }
 
+        function sortRecordsArray(records, sortKey, sortDir) {
+            const copy = [...records];
+            const mult = sortDir === "desc" ? -1 : 1;
+            copy.sort((a, b) => {
+                if (sortKey === "timeLocal") {
+                    return mult * (a.timeLocal || "").localeCompare(b.timeLocal || "");
+                }
+                const va = (a[sortKey] !== null && a[sortKey] !== undefined && !isNaN(a[sortKey])) ? Number(a[sortKey]) : -Infinity;
+                const vb = (b[sortKey] !== null && b[sortKey] !== undefined && !isNaN(b[sortKey])) ? Number(b[sortKey]) : -Infinity;
+                return mult * (va - vb);
+            });
+            return copy;
+        }
+
         function updateTable() {
             const tbody = document.getElementById("dataTableBody");
             tbody.innerHTML = "";
-            const preview = [...globalDataset].reverse().slice(0, 150);
+            if (globalDataset.length === 0) return;
 
-            preview.forEach(r => {
+            const sortKey = document.getElementById("liveTableSortKey")?.value || "timeLocal";
+            const sortDir = document.getElementById("liveTableSortDir")?.value || "desc";
+            const groupStations = document.getElementById("liveTableSeparateStations")?.checked ?? true;
+
+            let finalRows = [];
+            if (groupStations) {
+                const stationIds = [...new Set(globalDataset.map(r => r.stationId))];
+                stationIds.forEach(stId => {
+                    const stRows = globalDataset.filter(r => r.stationId === stId);
+                    const sortedSt = sortRecordsArray(stRows, sortKey, sortDir);
+                    finalRows = finalRows.concat(sortedSt.slice(0, 75));
+                });
+            } else {
+                finalRows = sortRecordsArray(globalDataset, sortKey, sortDir).slice(0, 150);
+            }
+
+            let lastStId = null;
+            finalRows.forEach(r => {
+                if (groupStations && r.stationId !== lastStId) {
+                    lastStId = r.stationId;
+                    const hdrTr = document.createElement("tr");
+                    hdrTr.className = "bg-blue-500/10 dark:bg-blue-900/30 font-extrabold text-blue-700 dark:text-blue-300";
+                    hdrTr.innerHTML = `<td colspan="12" class="px-3 py-1.5 text-xs"><i class="fa-solid fa-tower-observation mr-1.5"></i> Station: ${r.stationName} (${r.stationId}) — Sorted by ${sortKey} (${sortDir.toUpperCase()})</td>`;
+                    tbody.appendChild(hdrTr);
+                }
+
                 const tr = document.createElement("tr");
                 tr.className = "hover:bg-slate-100 dark:hover:bg-slate-800/50 transition";
                 tr.innerHTML = `
@@ -1896,11 +2116,14 @@
                     const gMax = (p) => { const a = gValid(p); return a.length ? Number(Math.max(...a).toFixed(2)) : null; };
                     const gMin = (p) => { const a = gValid(p); return a.length ? Number(Math.min(...a).toFixed(2)) : null; };
                     return {
+                        stationId: "ALL",
+                        stationName: "Areal Network Mean",
                         timeLocal: t,
                         temp: gMean("temp"),
                         tempHigh: gMax("tempHigh"),
                         tempLow: gMin("tempLow"),
                         precipTotal: gMean("precipTotal"),
+                        precipRate: gMax("precipRate"),
                         humidity: gMean("humidity"),
                         dewpt: gMean("dewpt"),
                         windSpeed: gMean("windSpeed"),
@@ -1927,6 +2150,7 @@
                 humMin: min(valid("humidity")),
                 precipTotal: totalPrecip,
                 precipMaxInterval: max(series.map(s => s.precipTotal).filter(v => v !== null)),
+                precipRateMax: max(valid("precipRate")),
                 windAvg: mean(valid("windSpeed")),
                 windMaxGust: max(valid("windGust")),
                 windDirAvg: avgDir,
@@ -1936,7 +2160,8 @@
                 pressMin: min(valid("pressure")),
                 uvMax: max(valid("uv")),
                 solarMax: max(valid("solarRadiation")),
-                series
+                series,
+                rawRecords: records
             };
         }
 
@@ -1978,119 +2203,55 @@
                 });
             }
 
+            const badge = document.getElementById("statusBadge");
             const progWrap = document.getElementById("progressWrapper");
             const progBar = document.getElementById("progressBar");
             const progText = document.getElementById("progressText");
             const progPct = document.getElementById("progressPercent");
 
+            badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Comparing...`;
             progWrap.classList.remove("hidden");
             progBar.style.width = "5%";
 
-            try {
-                compResults = [];
+            compResults = [];
 
-                for (let i = 0; i < periodsConfig.length; i++) {
-                    const p = periodsConfig[i];
+            try {
+                for (let pIdx = 0; pIdx < periodsConfig.length; pIdx++) {
+                    const pCfg = periodsConfig[pIdx];
                     let periodRecords = [];
 
                     if (selectedSt === "ALL") {
                         for (let sIdx = 0; sIdx < STATIONS.length; sIdx++) {
                             const st = STATIONS[sIdx];
-                            const recs = await fetchStationRangeData(st.id, st.name, p.start, p.end, intervalMode);
-                            periodRecords = periodRecords.concat(recs);
+                            const d = await fetchStationRangeData(st.id, st.name, pCfg.start, pCfg.end, intervalMode, (done, tot) => {
+                                const overall = Math.round((((pIdx * STATIONS.length) + sIdx + (done / tot)) / (periodsConfig.length * STATIONS.length)) * 100);
+                                progBar.style.width = `${overall}%`;
+                                progPct.textContent = `${overall}%`;
+                                progText.textContent = `Comparing ${pCfg.label} — ${st.name} (${done}/${tot})...`;
+                            });
+                            periodRecords = periodRecords.concat(d);
                         }
                     } else {
                         const st = STATIONS.find(s => s.id === selectedSt) || STATIONS[0];
-                        periodRecords = await fetchStationRangeData(st.id, st.name, p.start, p.end, intervalMode, (done, total) => {
-                            const pct = Math.round(((i + (done / total)) / periodsConfig.length) * 100);
-                            progBar.style.width = `${pct}%`;
-                            progPct.textContent = `${pct}%`;
-                            progText.textContent = `Comparing ${p.label}: Fetching (${done}/${total})...`;
+                        periodRecords = await fetchStationRangeData(st.id, st.name, pCfg.start, pCfg.end, intervalMode, (done, tot) => {
+                            const overall = Math.round(((pIdx + (done / tot)) / periodsConfig.length) * 100);
+                            progBar.style.width = `${overall}%`;
+                            progPct.textContent = `${overall}%`;
+                            progText.textContent = `Fetching ${pCfg.label} (${done}/${tot})...`;
                         });
                     }
 
-                    const summary = computePeriodSummary(periodRecords, selectedSt === "ALL");
-                    compResults.push({ ...p, summary });
+                    const stats = computePeriodSummary(periodRecords, selectedSt === "ALL");
+                    compResults.push({ ...pCfg, stats });
                 }
 
                 renderComparisonSummaryCards();
                 renderComparisonCharts();
                 renderComparisonMatrixTable();
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Comparison Ready`;
             } finally {
                 setTimeout(() => progWrap.classList.add("hidden"), 300);
             }
-        }
-
-        function renderComparisonSummaryCards() {
-            const container = document.getElementById("compSummaryCardsGrid");
-            container.innerHTML = "";
-            container.className = compResults.length === 2
-                ? "grid grid-cols-1 md:grid-cols-2 gap-5"
-                : "grid grid-cols-1 md:grid-cols-3 gap-5";
-
-            compResults.forEach((p, idx) => {
-                const s = p.summary;
-                const card = document.createElement("div");
-                card.className = `bg-white dark:bg-slate-900 border-2 ${p.borderCol} rounded-2xl p-5 shadow-sm space-y-4`;
-                card.innerHTML = `
-                    <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-800 pb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl ${p.bgLight} ${p.textCol} flex items-center justify-center text-lg font-extrabold">
-                                P${idx + 1}
-                            </div>
-                            <div>
-                                <h3 class="text-base font-extrabold text-slate-900 dark:text-white">${p.label}</h3>
-                                <p class="text-[11px] font-mono text-slate-500 dark:text-slate-400">${p.start} → ${p.end}</p>
-                            </div>
-                        </div>
-                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${p.bgLight} ${p.textCol}">
-                            ${s.count.toLocaleString()} pts
-                        </span>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 flex items-start gap-2.5">
-                            <i class="fa-solid fa-temperature-three-quarters text-orange-500 text-lg mt-0.5"></i>
-                            <div>
-                                <div class="text-[11px] text-slate-500 font-semibold">Temperature</div>
-                                <div class="text-sm font-extrabold">Avg: ${s.tempAvg ?? '--'} °C</div>
-                                <div class="text-[11px] mt-0.5">
-                                    <span class="text-rose-500 font-bold">Max: ${s.tempMax ?? '--'}°</span> •
-                                    <span class="text-cyan-600 font-bold">Min: ${s.tempMin ?? '--'}°</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 flex items-start gap-2.5">
-                            <i class="fa-solid fa-cloud-showers-water text-blue-500 text-lg mt-0.5"></i>
-                            <div>
-                                <div class="text-[11px] text-slate-500 font-semibold">Precipitation</div>
-                                <div class="text-sm font-extrabold text-blue-600 dark:text-blue-400">Total: ${s.precipTotal ?? 0} mm</div>
-                                <div class="text-[11px] text-slate-500 mt-0.5">Max Peak: <b>${s.precipMaxInterval ?? 0} mm</b></div>
-                            </div>
-                        </div>
-
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 flex items-start gap-2.5">
-                            <i class="fa-solid fa-wind text-teal-500 text-lg mt-0.5"></i>
-                            <div>
-                                <div class="text-[11px] text-slate-500 font-semibold">Wind & Direction</div>
-                                <div class="text-sm font-extrabold">Mean: ${s.windAvg ?? '--'} km/h</div>
-                                <div class="text-[11px] text-rose-500 font-semibold mt-0.5">Max Gust: ${s.windMaxGust ?? '--'} km/h (${s.windSector})</div>
-                            </div>
-                        </div>
-
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 flex items-start gap-2.5">
-                            <i class="fa-solid fa-sun-plant-wilt text-amber-500 text-lg mt-0.5"></i>
-                            <div>
-                                <div class="text-[11px] text-slate-500 font-semibold">Humidity / UV / Solar</div>
-                                <div class="text-sm font-extrabold">RH: ${s.humAvg ?? '--'}% | UV: ${s.uvMax ?? '--'}</div>
-                                <div class="text-[11px] text-slate-500 mt-0.5">${s.pressAvg ?? '--'} hPa • ${s.solarMax ?? '--'} W/m²</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
         }
 
         function switchCompPage(pageNum) {
@@ -2102,63 +2263,148 @@
             renderComparisonCharts();
         }
 
+        function renderComparisonSummaryCards() {
+            const container = document.getElementById("compSummaryCardsGrid");
+            container.innerHTML = "";
+            container.className = `grid grid-cols-1 md:grid-cols-${compResults.length} gap-5`;
+
+            compResults.forEach((p, idx) => {
+                const s = p.stats;
+                let deltaBadge = "";
+                if (idx > 0 && compResults[0].stats.tempAvg !== null && s.tempAvg !== null) {
+                    const dTemp = (compResults[0].stats.tempAvg - s.tempAvg).toFixed(1);
+                    const dRain = (compResults[0].stats.precipTotal - s.precipTotal).toFixed(1);
+                    deltaBadge = `
+                        <div class="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px] flex justify-between text-slate-500 dark:text-slate-400">
+                            <span>vs ${compResults[0].label} Temp Δ: <strong class="${dTemp >= 0 ? 'text-rose-500' : 'text-cyan-500'}">${dTemp >= 0 ? '+' : ''}${dTemp}°C</strong></span>
+                            <span>Precip Δ: <strong class="text-blue-500">${dRain >= 0 ? '+' : ''}${dRain} mm</strong></span>
+                        </div>
+                    `;
+                }
+
+                const card = document.createElement("div");
+                card.className = `bg-white dark:bg-slate-900 border-2 ${p.borderCol} rounded-2xl p-4 shadow-sm flex flex-col justify-between`;
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${p.bgLight} ${p.textCol}">
+                                    Period ${idx + 1} Summary
+                                </span>
+                                <h3 class="text-lg font-extrabold mt-1 text-slate-900 dark:text-white">${p.label}</h3>
+                                <p class="text-[11px] font-mono text-slate-400">${p.start} → ${p.end}</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl ${p.bgLight} flex items-center justify-center ${p.textCol} text-lg">
+                                <i class="fa-solid fa-calendar-days"></i>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2.5 text-xs">
+                            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-800 flex items-center gap-2.5">
+                                <i class="fa-solid fa-temperature-three-quarters text-orange-500 text-base"></i>
+                                <div>
+                                    <div class="text-[10px] text-slate-400">Avg Temp</div>
+                                    <div class="font-extrabold text-sm">${s.tempAvg ?? '--'} °C</div>
+                                    <div class="text-[10px]"><span class="text-rose-500">H:${s.tempMax ?? '--'}°</span> <span class="text-cyan-500">L:${s.tempMin ?? '--'}°</span></div>
+                                </div>
+                            </div>
+
+                            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-800 flex items-center gap-2.5">
+                                <i class="fa-solid fa-cloud-showers-heavy text-blue-500 text-base"></i>
+                                <div>
+                                    <div class="text-[10px] text-slate-400">Total Precip</div>
+                                    <div class="font-extrabold text-sm text-blue-600 dark:text-blue-400">${s.precipTotal ?? '0'} mm</div>
+                                    <div class="text-[10px] text-slate-400">Max Rate: ${s.precipRateMax ?? '0'} mm/h</div>
+                                </div>
+                            </div>
+
+                            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-800 flex items-center gap-2.5">
+                                <i class="fa-solid fa-droplet text-sky-500 text-base"></i>
+                                <div>
+                                    <div class="text-[10px] text-slate-400">Humidity & Dew</div>
+                                    <div class="font-extrabold text-sm">${s.humAvg ?? '--'} %</div>
+                                    <div class="text-[10px] text-slate-400">Dew Avg: ${s.dewAvg ?? '--'}°C</div>
+                                </div>
+                            </div>
+
+                            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-800 flex items-center gap-2.5">
+                                <i class="fa-solid fa-wind text-teal-500 text-base"></i>
+                                <div>
+                                    <div class="text-[10px] text-slate-400">Wind & Gust</div>
+                                    <div class="font-extrabold text-sm">${s.windAvg ?? '--'} km/h</div>
+                                    <div class="text-[10px] text-rose-500 font-semibold">Gust: ${s.windMaxGust ?? '--'} (${s.windSector})</div>
+                                </div>
+                            </div>
+
+                            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-800 flex items-center gap-2.5">
+                                <i class="fa-solid fa-gauge-high text-purple-500 text-base"></i>
+                                <div>
+                                    <div class="text-[10px] text-slate-400">Mean Pressure</div>
+                                    <div class="font-extrabold text-sm">${s.pressAvg ?? '--'} hPa</div>
+                                    <div class="text-[10px] text-slate-400">${s.pressMin ?? '--'}–${s.pressMax ?? '--'}</div>
+                                </div>
+                            </div>
+
+                            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-800 flex items-center gap-2.5">
+                                <i class="fa-solid fa-sun text-amber-500 text-base"></i>
+                                <div>
+                                    <div class="text-[10px] text-slate-400">Peak UV / Solar</div>
+                                    <div class="font-extrabold text-sm">UV ${s.uvMax ?? '--'}</div>
+                                    <div class="text-[10px] text-slate-400">${s.solarMax ?? '--'} W/m²</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ${deltaBadge}
+                `;
+                container.appendChild(card);
+            });
+        }
+
         function renderComparisonCharts() {
             if (compResults.length === 0) return;
 
             const isDark = document.documentElement.classList.contains("dark");
             const textColor = isDark ? "#cbd5e1" : "#334155";
             const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(15, 23, 42, 0.08)";
-            const param = document.getElementById("compParamSelect").value;
-            const intervalMode = document.getElementById("compIntervalSelect").value;
-            const meta = PARAM_META[param] || { label: param, unit: "" };
 
+            const param = document.getElementById("compParamSelect").value;
+            const meta = PARAM_META[param] || { label: param, unit: "" };
             const ctx1 = document.getElementById("compOverlayChart").getContext("2d");
             if (compOverlayChartInst) compOverlayChartInst.destroy();
 
-            const maxLen = Math.max(...compResults.map(p => p.summary.series.length), 1);
-            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const maxLen = Math.max(...compResults.map(r => r.stats.series.length), 1);
+            const longestPeriod = compResults.find(r => r.stats.series.length === maxLen) || compResults[0];
 
-            const labels = Array.from({ length: maxLen }, (_, idx) => {
-                if (intervalMode === "monthly" && maxLen <= 12) {
-                    const firstTime = compResults[0].summary.series[idx]?.timeLocal;
-                    if (firstTime) {
-                        const mIdx = parseInt(firstTime.slice(5, 7), 10) - 1;
-                        if (monthNames[mIdx]) return monthNames[mIdx];
-                    }
-                    return `Month ${idx + 1}`;
+            const labels = longestPeriod.stats.series.map((item, i) => {
+                if (item.timeLocal.length === 7) {
+                    const mNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    const mIdx = parseInt(item.timeLocal.slice(5, 7), 10) - 1;
+                    return mNames[mIdx] || `Step ${i + 1}`;
                 }
-                if (intervalMode === "weekly") return `Week ${idx + 1}`;
-                if (intervalMode === "daily") return `Day ${idx + 1}`;
-                return `Interval ${idx + 1}`;
+                return item.timeLocal.slice(5);
             });
 
-            const compStatsLines = [];
+            let compStatsLines = [];
 
             const overlayDatasets = compResults.map(p => {
-                const vals = p.summary.series.map(r => r[param]).filter(v => v !== null && !isNaN(v));
-                const pMax = vals.length ? Math.max(...vals).toFixed(1) : "--";
-                const pMin = vals.length ? Math.min(...vals).toFixed(1) : "--";
-                const pAvg = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : "--";
-                const pTotalPrecip = (p.summary.precipTotal ?? 0).toFixed(2);
+                const sVals = p.stats.series.map(x => x[param]).filter(v => v !== null && !isNaN(v));
+                const sMax = sVals.length ? Math.max(...sVals).toFixed(1) : "--";
+                const sMin = sVals.length ? Math.min(...sVals).toFixed(1) : "--";
+                const sSum = sVals.length ? sVals.reduce((a, b) => a + b, 0).toFixed(1) : "0.0";
 
-                let legendLabel = "";
-                if (param === "precipTotal") {
-                    legendLabel = `${p.label} — ${meta.label} (Total: ${pTotalPrecip} mm | Max: ${pMax} mm)`;
-                    compStatsLines.push({
-                        color: p.color,
-                        text: `${p.label}: Total ${pTotalPrecip} mm (Max ${pMax} mm)`
-                    });
-                } else {
-                    legendLabel = `${p.label} — ${meta.label} (Max: ${pMax}${meta.unit} | Min: ${pMin}${meta.unit} | Avg: ${pAvg}${meta.unit})`;
-                    compStatsLines.push({
-                        color: p.color,
-                        text: `${p.label}: Max ${pMax}${meta.unit} | Min ${pMin}${meta.unit} | Avg ${pAvg}${meta.unit}`
-                    });
-                }
+                const summaryTxt = param === "precipTotal"
+                    ? `Total: ${p.stats.precipTotal} mm | Max: ${sMax} mm`
+                    : `Max: ${sMax}${meta.unit} | Min: ${sMin}${meta.unit}`;
+
+                compStatsLines.push({
+                    color: p.color,
+                    text: `${p.label}: ${summaryTxt}`
+                });
 
                 return {
-                    label: legendLabel,
-                    data: p.summary.series.map(r => r[param]),
+                    label: `${p.label} — ${meta.label} (${summaryTxt})`,
+                    data: p.stats.series.map(x => x[param]),
                     borderColor: p.color,
                     backgroundColor: param === "precipTotal" ? p.color + "BB" : p.color + "22",
                     borderWidth: 2.5,
@@ -2168,7 +2414,7 @@
                 };
             });
 
-            const compRightPad = window.innerWidth < 640 ? 8 : 230;
+            const rightPadComp = window.innerWidth < 640 ? 8 : 220;
 
             compOverlayChartInst = new Chart(ctx1, {
                 type: param === "precipTotal" ? "bar" : "line",
@@ -2176,10 +2422,10 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: { padding: { top: 6, right: compRightPad } },
-                    interaction: { mode: "index", intersect: false },
+                    layout: { padding: { top: 6, right: rightPadComp } },
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: { labels: { color: textColor, font: { size: 11.5, weight: "bold" } } },
+                        legend: { labels: { color: textColor, font: { size: 11, weight: 'bold' } } },
                         inChartStatsBoxPlugin: {
                             title: `Comparison — ${meta.label}`,
                             lines: compStatsLines
@@ -2192,67 +2438,82 @@
                 }
             });
 
-            const ctxLeft = document.getElementById("compBarChartLeft").getContext("2d");
-            const ctxRight = document.getElementById("compBarChartRight").getContext("2d");
+            const ctx2L = document.getElementById("compBarChartLeft").getContext("2d");
+            const ctx2R = document.getElementById("compBarChartRight").getContext("2d");
             if (compBarLeftInst) compBarLeftInst.destroy();
             if (compBarRightInst) compBarRightInst.destroy();
 
-            const periodLabels = compResults.map(p => p.label);
-
-            compBarLeftInst = new Chart(ctxLeft, {
+            compBarLeftInst = new Chart(ctx2L, {
                 type: "bar",
                 data: {
-                    labels: periodLabels,
-                    datasets: [
-                        { label: "Max Temperature (°C)", data: compResults.map(p => p.summary.tempMax), backgroundColor: "#f43f5e" },
-                        { label: "Avg Temperature (°C)", data: compResults.map(p => p.summary.tempAvg), backgroundColor: "#f97316" },
-                        { label: "Min Temperature (°C)", data: compResults.map(p => p.summary.tempMin), backgroundColor: "#06b6d4" },
-                        { label: "Mean Dew Point (°C)", data: compResults.map(p => p.summary.dewAvg), backgroundColor: "#8b5cf6" },
-                        { label: "Mean Wind Speed (km/h)", data: compResults.map(p => p.summary.windAvg), backgroundColor: "#14b8a6" },
-                        { label: "Max Wind Gust (km/h)", data: compResults.map(p => p.summary.windMaxGust), backgroundColor: "#eab308" }
-                    ]
+                    labels: ["Temp Avg (°C)", "Temp Max (°C)", "Temp Min (°C)", "Dew Point (°C)", "Wind Avg (km/h)", "Max Gust (km/h)"],
+                    datasets: compResults.map(p => ({
+                        label: p.label,
+                        data: [p.stats.tempAvg, p.stats.tempMax, p.stats.tempMin, p.stats.dewAvg, p.stats.windAvg, p.stats.windMaxGust],
+                        backgroundColor: p.color + "CC",
+                        borderColor: p.color,
+                        borderWidth: 1.5,
+                        borderRadius: 6
+                    }))
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: textColor, font: { size: 10, weight: "bold" } } } },
+                    plugins: { legend: { labels: { color: textColor, font: { weight: 'bold' } } } },
                     scales: {
-                        x: { ticks: { color: textColor, font: { weight: "bold" } }, grid: { color: gridColor } },
+                        x: { ticks: { color: textColor, font: { size: 10, weight: 'bold' } }, grid: { color: gridColor } },
                         y: { ticks: { color: textColor }, grid: { color: gridColor } }
                     }
                 }
             });
 
-            compBarRightInst = new Chart(ctxRight, {
+            compBarRightInst = new Chart(ctx2R, {
                 type: "bar",
                 data: {
-                    labels: periodLabels,
-                    datasets: [
-                        { label: "Total Precipitation (mm)", data: compResults.map(p => p.summary.precipTotal), backgroundColor: "#2563eb" },
-                        { label: "Max Interval Precip (mm)", data: compResults.map(p => p.summary.precipMaxInterval), backgroundColor: "#38bdf8" },
-                        { label: "Mean Relative Humidity (%)", data: compResults.map(p => p.summary.humAvg), backgroundColor: "#10b981" },
-                        { label: "Max UV Index", data: compResults.map(p => p.summary.uvMax), backgroundColor: "#f59e0b" }
-                    ]
+                    labels: ["Total Precip (mm)", "Max Rate (mm/h)", "Humidity Avg (%)", "Humidity Max (%)", "Max UV Index"],
+                    datasets: compResults.map(p => ({
+                        label: p.label,
+                        data: [p.stats.precipTotal, p.stats.precipRateMax, p.stats.humAvg, p.stats.humMax, p.stats.uvMax],
+                        backgroundColor: p.color + "CC",
+                        borderColor: p.color,
+                        borderWidth: 1.5,
+                        borderRadius: 6
+                    }))
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: textColor, font: { size: 10, weight: "bold" } } } },
+                    plugins: { legend: { labels: { color: textColor, font: { weight: 'bold' } } } },
                     scales: {
-                        x: { ticks: { color: textColor, font: { weight: "bold" } }, grid: { color: gridColor } },
+                        x: { ticks: { color: textColor, font: { size: 10, weight: 'bold' } }, grid: { color: gridColor } },
                         y: { ticks: { color: textColor }, grid: { color: gridColor } }
                     }
                 }
             });
         }
 
+        function getComparisonMatrixDefinitions() {
+            return [
+                { key: "temp",        name: "Average Temperature",      unit: "°C",   prop: "tempAvg" },
+                { key: "temp",        name: "Maximum Temperature",      unit: "°C",   prop: "tempMax" },
+                { key: "temp",        name: "Minimum Temperature",      unit: "°C",   prop: "tempMin" },
+                { key: "dewpt",       name: "Mean Dew Point",           unit: "°C",   prop: "dewAvg" },
+                { key: "humidity",    name: "Mean Relative Humidity",   unit: "%",    prop: "humAvg" },
+                { key: "precipTotal", name: "Total Precipitation",      unit: "mm",   prop: "precipTotal" },
+                { key: "precipRate",  name: "Max Precipitation Rate",   unit: "mm/h", prop: "precipRateMax" },
+                { key: "windSpeed",   name: "Mean Wind Speed",          unit: "km/h", prop: "windAvg" },
+                { key: "windSpeed",   name: "Maximum Wind Gust",        unit: "km/h", prop: "windMaxGust" },
+                { key: "winddir",     name: "Mean Wind Direction",      unit: "°",    prop: "windDirAvg" },
+                { key: "pressure",    name: "Mean Barometric Pressure", unit: "hPa",  prop: "pressAvg" },
+                { key: "uvSolar",     name: "Maximum UV Index",         unit: "UV",   prop: "uvMax" },
+                { key: "uvSolar",     name: "Peak Solar Radiation",     unit: "W/m²", prop: "solarMax" }
+            ];
+        }
+
         function renderComparisonMatrixTable() {
             const thead = document.getElementById("compTableHead");
             const tbody = document.getElementById("compTableBody");
-            thead.innerHTML = "";
-            tbody.innerHTML = "";
-
-            if (compResults.length === 0) return;
+            if (!thead || !tbody || compResults.length < 2) return;
 
             const isThree = compResults.length === 3;
             thead.innerHTML = `
@@ -2261,647 +2522,539 @@
                     <th class="p-3 text-blue-600 dark:text-blue-400">${compResults[0].label} (${compResults[0].start} → ${compResults[0].end})</th>
                     <th class="p-3 text-amber-600 dark:text-amber-400">${compResults[1].label} (${compResults[1].start} → ${compResults[1].end})</th>
                     ${isThree ? `<th class="p-3 text-emerald-600 dark:text-emerald-400">${compResults[2].label} (${compResults[2].start} → ${compResults[2].end})</th>` : ''}
-                    <th class="p-3">Δ Difference (${compResults[0].label} vs ${compResults[1].label})</th>
+                    <th class="p-3">Net Change (P1 vs P2)</th>
                 </tr>
             `;
 
-            const rowsSpec = [
-                { name: "🌡️ Average Temperature (°C)", key: "tempAvg", unit: "°C" },
-                { name: "🔥 Maximum Temperature (°C)", key: "tempMax", unit: "°C" },
-                { name: "❄️ Minimum Temperature (°C)", key: "tempMin", unit: "°C" },
-                { name: "💧 Mean Dew Point (°C)", key: "dewAvg", unit: "°C" },
-                { name: "💦 Mean Relative Humidity (%)", key: "humAvg", unit: "%" },
-                { name: "🌧️ Total Accumulated Precipitation (mm)", key: "precipTotal", unit: "mm" },
-                { name: "⛈️ Maximum Interval / Daily Rainfall (mm)", key: "precipMaxInterval", unit: "mm" },
-                { name: "🌬️ Mean Wind Speed (km/h)", key: "windAvg", unit: "km/h" },
-                { name: "💨 Maximum Wind Gust (km/h)", key: "windMaxGust", unit: "km/h" },
-                { name: "🧭 Prevailing Wind Direction (°)", key: "windDirAvg", unit: "°" },
-                { name: "⏲️ Mean Barometric Pressure (hPa)", key: "pressAvg", unit: "hPa" },
-                { name: "☀️ Maximum UV Index", key: "uvMax", unit: "" },
-                { name: "🔆 Peak Solar Radiation (W/m²)", key: "solarMax", unit: "W/m²" }
-            ];
+            const rows = getComparisonMatrixDefinitions();
 
-            rowsSpec.forEach(spec => {
-                const v1 = compResults[0].summary[spec.key];
-                const v2 = compResults[1].summary[spec.key];
-                const v3 = isThree ? compResults[2].summary[spec.key] : null;
-
-                let deltaStr = "--";
-                let deltaColor = "text-slate-500";
+            tbody.innerHTML = "";
+            rows.forEach(r => {
+                const v1 = compResults[0].stats[r.prop];
+                const v2 = compResults[1].stats[r.prop];
+                const v3 = isThree ? compResults[2].stats[r.prop] : null;
+                let diffStr = "--";
                 if (v1 !== null && v2 !== null && !isNaN(v1) && !isNaN(v2)) {
-                    const diff = Number((v1 - v2).toFixed(2));
-                    const sign = diff > 0 ? "+" : "";
-                    deltaStr = `${sign}${diff} ${spec.unit}`;
-                    deltaColor = diff > 0 ? "text-emerald-600 dark:text-emerald-400 font-bold" : (diff < 0 ? "text-rose-500 font-bold" : "text-slate-500");
+                    const diff = (v1 - v2).toFixed(2);
+                    diffStr = `${diff >= 0 ? '+' : ''}${diff} ${r.unit}`;
                 }
 
                 const tr = document.createElement("tr");
                 tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50";
                 tr.innerHTML = `
-                    <td class="p-3 font-bold">${spec.name}</td>
-                    <td class="p-3 font-semibold">${v1 ?? '--'} ${spec.unit}</td>
-                    <td class="p-3 font-semibold">${v2 ?? '--'} ${spec.unit}</td>
-                    ${isThree ? `<td class="p-3 font-semibold">${v3 ?? '--'} ${spec.unit}</td>` : ''}
-                    <td class="p-3 font-mono ${deltaColor}">${deltaStr}</td>
+                    <td class="p-3 font-bold">${r.name} <span class="text-slate-400 font-normal">(${r.unit})</span></td>
+                    <td class="p-3 font-extrabold text-blue-600 dark:text-blue-400">${v1 ?? '--'} ${r.unit}</td>
+                    <td class="p-3 font-extrabold text-amber-600 dark:text-amber-400">${v2 ?? '--'} ${r.unit}</td>
+                    ${isThree ? `<td class="p-3 font-extrabold text-emerald-600 dark:text-emerald-400">${v3 ?? '--'} ${r.unit}</td>` : ''}
+                    <td class="p-3 font-mono font-bold">${diffStr}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
         // ============================================================================
-        // EXPORT MULTI-WORKSHEET EXCEL (.XLSX) & FLAT CSV
+        // CONFIGURABLE PDF REPORT MODAL & GENERATOR (SINGLE GRAPH OR 3x3 GRID + TABLES)
         // ============================================================================
-        function exportComparisonExcel() {
-            if (compResults.length === 0) {
-                alert("Please run a comparison first!");
+        function openPdfConfigModal(mode, reportType, canvasId = "weatherChart", filePrefix = "Report") {
+            if (mode === "dashboard" && globalDataset.length === 0) {
+                alert("Please fetch station data first before exporting a PDF report.");
+                return;
+            }
+            if (mode === "compare" && compResults.length === 0) {
+                alert("Please run a comparison analysis first before exporting a PDF report.");
                 return;
             }
 
-            const wb = XLSX.utils.book_new();
-            const stSelect = document.getElementById("compStationSelect");
-            const stName = stSelect.options[stSelect.selectedIndex].text;
+            pendingPdfContext = { mode, reportType, canvasId, filePrefix };
 
-            const matrixAOA = [
-                ["METEOROLOGICAL CENTER — UNIVERSITY OF SULAIMANI"],
-                ["College of Science • Department of Earth Sciences and Petroleum • Developed by Hawber Ata"],
-                [`MULTI-PERIOD CLIMATIC COMPARISON REPORT — Station: ${stName}`],
-                [],
-                [
-                    "Parameter",
-                    ...compResults.map(p => `${p.label} (${p.start} to ${p.end})`),
-                    `Delta (${compResults[0].label} - ${compResults[1].label})`
-                ]
-            ];
+            const graphSection = document.getElementById("pdfGraphChecklistSection");
+            const sub = document.getElementById("pdfModalSubtitle");
 
-            const metrics = [
-                ["Average Temperature (°C)", "tempAvg"],
-                ["Maximum Temperature (°C)", "tempMax"],
-                ["Minimum Temperature (°C)", "tempMin"],
-                ["Mean Dew Point (°C)", "dewAvg"],
-                ["Mean Relative Humidity (%)", "humAvg"],
-                ["Total Precipitation (mm)", "precipTotal"],
-                ["Maximum Interval Precipitation (mm)", "precipMaxInterval"],
-                ["Mean Wind Speed (km/h)", "windAvg"],
-                ["Maximum Wind Gust (km/h)", "windMaxGust"],
-                ["Mean Wind Direction (°)", "windDirAvg"],
-                ["Mean Barometric Pressure (hPa)", "pressAvg"],
-                ["Maximum UV Index", "uvMax"],
-                ["Peak Solar Radiation (W/m²)", "solarMax"]
-            ];
+            if (reportType === "grid") {
+                graphSection.classList.remove("hidden");
+                sub.textContent = "Checklist: Choose which parameters to plot in the 3×3 PDF Grid and which columns to include in the Station-Sorted Interval Summary Tables.";
+            } else {
+                graphSection.classList.add("hidden");
+                sub.textContent = "Configure which parameter columns and station-sorting rules to include in the Summary & Interval Tables below your selected chart.";
+            }
 
-            metrics.forEach(([label, key]) => {
-                const vals = compResults.map(p => p.summary[key] ?? "");
-                const diff = (vals[0] !== "" && vals[1] !== "") ? Number((vals[0] - vals[1]).toFixed(2)) : "";
-                matrixAOA.push([label, ...vals, diff]);
-            });
-
-            const wsSummary = XLSX.utils.aoa_to_sheet(matrixAOA);
-            wsSummary["!cols"] = new Array(compResults.length + 2).fill({ wch: 28 });
-            XLSX.utils.book_append_sheet(wb, wsSummary, "Comparison_Summary");
-
-            compResults.forEach((p, idx) => {
-                const aoa = [
-                    ["METEOROLOGICAL CENTER — UNIVERSITY OF SULAIMANI"],
-                    [`Period ${idx + 1}: ${p.label} (${p.start} to ${p.end}) | Station: ${stName}`],
-                    [],
-                    ["Timestamp", "Temp Avg (°C)", "Temp High (°C)", "Temp Low (°C)", "Dew Point (°C)", "Humidity (%)", "Precipitation (mm)", "Wind Speed (km/h)", "Wind Gust (km/h)", "Wind Dir (°)", "Pressure (hPa)", "UV Index", "Solar (W/m²)"]
-                ];
-                p.summary.series.forEach(r => {
-                    aoa.push([
-                        r.timeLocal, r.temp ?? "", r.tempHigh ?? "", r.tempLow ?? "", r.dewpt ?? "",
-                        r.humidity ?? "", r.precipTotal ?? 0, r.windSpeed ?? "", r.windGust ?? "",
-                        r.winddir ?? "", r.pressure ?? "", r.uv ?? "", r.solarRadiation ?? ""
-                    ]);
-                });
-                const ws = XLSX.utils.aoa_to_sheet(aoa);
-                ws["!cols"] = new Array(13).fill({ wch: 16 });
-                const cleanName = `P${idx + 1}_${p.label.replace(/[:\\/?*\[\]]/g, "")}`.slice(0, 31);
-                XLSX.utils.book_append_sheet(wb, ws, cleanName);
-            });
-
-            XLSX.writeFile(wb, `UOS_MultiPeriod_Comparison_${compResults.map(p => p.label.replace(/\s+/g, '')).join('_vs_')}.xlsx`);
+            document.getElementById("pdfConfigModal").classList.remove("hidden");
         }
 
-        function exportToExcel() {
-            if (globalDataset.length === 0) {
-                alert("No telemetry data loaded to export!");
-                return;
-            }
+        function closePdfConfigModal() {
+            document.getElementById("pdfConfigModal").classList.add("hidden");
+        }
 
-            const wb = XLSX.utils.book_new();
-            const sDate = document.getElementById("startDate").value;
-            const eDate = document.getElementById("endDate").value;
-            const selected = document.getElementById("stationSelect").value;
-            const exportTimestamp = new Date().toISOString().slice(0, 19).replace("T", " ");
+        function togglePdfCheckboxes(className, state) {
+            document.querySelectorAll(`.${className}`).forEach(cb => cb.checked = state);
+        }
 
-            const calcStationStats = (records) => {
-                const valid = (p) => records.map(r => r[p]).filter(v => v !== null && !isNaN(v));
-                const mean = (arr) => arr.length ? Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2)) : "--";
-                const max = (arr) => arr.length ? Number(Math.max(...arr).toFixed(2)) : "--";
-                const min = (arr) => arr.length ? Number(Math.min(...arr).toFixed(2)) : "--";
-                const sum = (arr) => arr.length ? Number(arr.reduce((a, b) => a + b, 0).toFixed(2)) : 0;
+        function getPdfUserConfig() {
+            const graphParams = [...document.querySelectorAll(".pdf-graph-chk:checked")].map(cb => cb.value);
+            const tableParams = new Set([...document.querySelectorAll(".pdf-table-chk:checked")].map(cb => cb.value));
+            const sortField = document.getElementById("pdfSortField").value || "timeLocal";
+            const sortOrder = document.getElementById("pdfSortOrder").value || "asc";
+            const separateStations = document.getElementById("pdfSeparateStationTables").checked;
+            const includeIntervalLog = document.getElementById("pdfIncludeIntervalLog").checked;
 
-                return {
-                    count: records.length,
-                    tempAvg: mean(valid("temp")),
-                    tempMax: max(valid("tempHigh")),
-                    tempMin: min(valid("tempLow")),
-                    dewAvg: mean(valid("dewpt")),
-                    humAvg: mean(valid("humidity")),
-                    precipSum: sum(valid("precipTotal")),
-                    precipRateMax: max(valid("precipRate")),
-                    windAvg: mean(valid("windSpeed")),
-                    windGustMax: max(valid("windGust")),
-                    windDirAvg: mean(valid("winddir")),
-                    pressAvg: mean(valid("pressure")),
-                    uvMax: max(valid("uv")),
-                    solarMax: max(valid("solarRadiation"))
-                };
+            return {
+                graphParams: graphParams.length > 0 ? graphParams : ["temp"],
+                tableParams: tableParams.size > 0 ? tableParams : new Set(["temp", "precipTotal"]),
+                sortField,
+                sortOrder,
+                separateStations,
+                includeIntervalLog
             };
+        }
 
-            const stationsToExport = selected === "ALL"
-                ? STATIONS
-                : [STATIONS.find(s => s.id === selected) || STATIONS[0]];
+        async function confirmAndGeneratePDF() {
+            const cfg = getPdfUserConfig();
+            closePdfConfigModal();
 
-            if (selected === "ALL") {
-                const stationStatsList = [];
-                stationsToExport.forEach(st => {
-                    const stRecords = globalDataset.filter(r => r.stationId === st.id);
-                    if (stRecords.length > 0) {
-                        stationStatsList.push({ st, stats: calcStationStats(stRecords) });
+            if (pendingPdfContext.reportType === "single") {
+                await generateSingleChartPDF(pendingPdfContext.canvasId, pendingPdfContext.filePrefix, pendingPdfContext.mode, cfg);
+            } else {
+                if (pendingPdfContext.mode === "dashboard") {
+                    await exportDashboardAllParamsPDF(cfg);
+                } else {
+                    await exportComparisonAllParamsPDF(cfg);
+                }
+            }
+        }
+
+        // Helper: Build Dynamic Interval Table Head & Body based on user's checked parameters
+        function buildDynamicIntervalTableColumns(tableParamsSet) {
+            const cols = [{ header: "Timestamp", getter: r => r.timeLocal }];
+            if (tableParamsSet.has("temp")) {
+                cols.push({ header: "Temp Avg (°C)", getter: r => r.temp ?? "--" });
+                cols.push({ header: "Temp Max (°C)", getter: r => r.tempHigh ?? "--" });
+                cols.push({ header: "Temp Min (°C)", getter: r => r.tempLow ?? "--" });
+            }
+            if (tableParamsSet.has("dewpt")) {
+                cols.push({ header: "Dew Pt (°C)", getter: r => r.dewpt ?? "--" });
+            }
+            if (tableParamsSet.has("humidity")) {
+                cols.push({ header: "Hum (%)", getter: r => r.humidity ?? "--" });
+            }
+            if (tableParamsSet.has("precipTotal")) {
+                cols.push({ header: "Precip (mm)", getter: r => r.precipTotal ?? "0" });
+            }
+            if (tableParamsSet.has("precipRate")) {
+                cols.push({ header: "Rate (mm/h)", getter: r => r.precipRate ?? "0" });
+            }
+            if (tableParamsSet.has("windSpeed")) {
+                cols.push({ header: "Wind (km/h)", getter: r => r.windSpeed ?? "--" });
+                cols.push({ header: "Gust (km/h)", getter: r => r.windGust ?? "--" });
+            }
+            if (tableParamsSet.has("winddir")) {
+                cols.push({ header: "Wind Dir", getter: r => r.winddir !== null ? `${r.winddir}° (${degToCompass(r.winddir)})` : "--" });
+            }
+            if (tableParamsSet.has("pressure")) {
+                cols.push({ header: "Press (hPa)", getter: r => r.pressure ?? "--" });
+            }
+            if (tableParamsSet.has("uvSolar")) {
+                cols.push({ header: "UV / Solar", getter: r => `${r.uv ?? '--'} / ${r.solarRadiation ?? '--'}` });
+            }
+            return cols;
+        }
+
+        // Helper: Append Station-Separated & Parameter-Sorted Interval Tables to jsPDF Document
+        function appendIntervalTablesToPdf(doc, records, cfg, sectionLabel = "") {
+            if (!cfg.includeIntervalLog || !records || records.length === 0) return;
+
+            const dynCols = buildDynamicIntervalTableColumns(cfg.tableParams);
+            const sortLabel = `${cfg.sortField} (${cfg.sortOrder.toUpperCase()})`;
+
+            if (cfg.separateStations) {
+                const stationIds = [...new Set(records.map(r => r.stationId))];
+                stationIds.forEach(stId => {
+                    const stRows = records.filter(r => r.stationId === stId);
+                    if (stRows.length === 0) return;
+                    const stName = stRows[0].stationName || stId;
+                    const sortedRows = sortRecordsArray(stRows, cfg.sortField, cfg.sortOrder);
+
+                    let yPos = doc.lastAutoTable ? doc.lastAutoTable.finalY + 9 : 25;
+                    if (yPos > 175) {
+                        doc.addPage();
+                        yPos = 16;
                     }
-                });
 
-                const arealMeanPrecip = stationStatsList.length > 0
-                    ? Number((stationStatsList.reduce((acc, x) => acc + x.stats.precipSum, 0) / stationStatsList.length).toFixed(2))
-                    : 0;
+                    doc.setFontSize(10);
+                    doc.setTextColor(30, 58, 138);
+                    const titlePrefix = sectionLabel ? `[${sectionLabel}] ` : "";
+                    doc.text(`${titlePrefix}Station Interval Log: ${stName} (${stId}) — ${sortedRows.length} Intervals (Sorted by ${sortLabel})`, 14, yPos);
 
-                const summaryAOA = [
-                    ["METEOROLOGICAL CENTER — UNIVERSITY OF SULAIMANI"],
-                    ["College of Science • Department of Earth Sciences and Petroleum"],
-                    ["MULTI-STATION HYDRO-METEOROLOGICAL NETWORK SUMMARY REPORT"],
-                    [`Date Range: ${sDate} to ${eDate}`, `Sampling Resolution: ${currentInterval.toUpperCase()}`, `Exported: ${exportTimestamp}`, `Prepared by: Hawber Ata`],
-                    [`Areal Mean Precipitation Across Active Network (${stationStatsList.length} Stations): ${arealMeanPrecip} mm`],
-                    [],
-                    [
-                        "Station ID", "Station Name", "Latitude", "Longitude", "Observations Count",
-                        "Mean Temp (°C)", "Max Temp (°C)", "Min Temp (°C)", "Mean Dew Point (°C)",
-                        "Mean Humidity (%)", "Total Precipitation (mm)", "Max Precip Rate (mm/hr)",
-                        "Mean Wind Speed (km/h)", "Max Wind Gust (km/h)", "Mean Wind Dir (°)", "Cardinal Sector",
-                        "Mean Pressure (hPa)", "Max UV Index", "Peak Solar Radiation (W/m²)"
-                    ]
-                ];
+                    const head = [dynCols.map(c => c.header)];
+                    const body = sortedRows.map(r => dynCols.map(c => c.getter(r)));
 
-                stationStatsList.forEach(({ st, stats }) => {
-                    summaryAOA.push([
-                        st.id, st.name, st.lat, st.lon, stats.count,
-                        stats.tempAvg, stats.tempMax, stats.tempMin, stats.dewAvg,
-                        stats.humAvg, stats.precipSum, stats.precipRateMax,
-                        stats.windAvg, stats.windGustMax, stats.windDirAvg, degToCompass(stats.windDirAvg),
-                        stats.pressAvg, stats.uvMax, stats.solarMax
-                    ]);
-                });
-
-                const summaryWS = XLSX.utils.aoa_to_sheet(summaryAOA);
-                summaryWS["!cols"] = new Array(19).fill({ wch: 18 });
-                XLSX.utils.book_append_sheet(wb, summaryWS, "Network_Summary");
-            }
-
-            stationsToExport.forEach(st => {
-                const stRecords = globalDataset.filter(r => r.stationId === st.id);
-                if (stRecords.length === 0) return;
-
-                const stStats = calcStationStats(stRecords);
-
-                const sheetAOA = [
-                    ["METEOROLOGICAL CENTER — UNIVERSITY OF SULAIMANI"],
-                    ["College of Science • Department of Earth Sciences and Petroleum • Developed by Hawber Ata"],
-                    [`Station Name: ${st.name} (${st.id})`, `Coordinates: ${st.lat}° N, ${st.lon}° E`, `Resolution: ${currentInterval.toUpperCase()}`],
-                    [`Report Period: ${sDate} to ${eDate}`, `Total Logged Intervals: ${stStats.count}`, `Export Timestamp: ${exportTimestamp}`],
-                    [
-                        `Summary Reference -> Mean Temp: ${stStats.tempAvg} °C`,
-                        `Max Temp: ${stStats.tempMax} °C`,
-                        `Min Temp: ${stStats.tempMin} °C`,
-                        `Total Precipitation: ${stStats.precipSum} mm`,
-                        `Mean Wind: ${stStats.windAvg} km/h (Max Gust: ${stStats.windGustMax} km/h)`
-                    ],
-                    [],
-                    [
-                        "Timestamp", "Station ID", "Station Name",
-                        "Temp Avg (°C)", "Temp High (°C)", "Temp Low (°C)", "Dew Point (°C)",
-                        "Relative Humidity (%)", "Interval Precipitation (mm)", "Precip Rate (mm/hr)",
-                        "Wind Speed (km/h)", "Wind Gust (km/h)", "Wind Direction (°)", "Wind Cardinal",
-                        "Barometric Pressure (hPa)", "UV Index", "Solar Radiation (W/m²)"
-                    ]
-                ];
-
-                stRecords.forEach(r => {
-                    sheetAOA.push([
-                        r.timeLocal, r.stationId, r.stationName,
-                        r.temp ?? "", r.tempHigh ?? "", r.tempLow ?? "", r.dewpt ?? "",
-                        r.humidity ?? "", r.precipTotal ?? 0, r.precipRate ?? 0,
-                        r.windSpeed ?? "", r.windGust ?? "", r.winddir ?? "", degToCompass(r.winddir),
-                        r.pressure ?? "", r.uv ?? "", r.solarRadiation ?? ""
-                    ]);
-                });
-
-                const ws = XLSX.utils.aoa_to_sheet(sheetAOA);
-                ws["!cols"] = [
-                    { wch: 18 }, { wch: 12 }, { wch: 20 },
-                    { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 },
-                    { wch: 18 }, { wch: 22 }, { wch: 18 },
-                    { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 14 },
-                    { wch: 20 }, { wch: 12 }, { wch: 20 }
-                ];
-
-                const cleanSheetName = `${st.id}_${st.name.replace(/[:\\/?*\[\]]/g, "")}`.slice(0, 31);
-                XLSX.utils.book_append_sheet(wb, ws, cleanSheetName);
-            });
-
-            const fileName = `UOS_Meteorological_Center_${selected}_${currentInterval}_${sDate}_to_${eDate}.xlsx`;
-            XLSX.writeFile(wb, fileName);
-        }
-
-        function exportToCSV() {
-            if (globalDataset.length === 0) {
-                alert("No telemetry data loaded to export!");
-                return;
-            }
-
-            const sDate = document.getElementById("startDate").value;
-            const eDate = document.getElementById("endDate").value;
-            const selected = document.getElementById("stationSelect").value;
-
-            const preamble = [
-                `"METEOROLOGICAL CENTER - UNIVERSITY OF SULAIMANI (COLLEGE OF SCIENCE)"`,
-                `"Department of Earth Sciences and Petroleum | Developed by Hawber Ata"`,
-                `"Station Selection: ${selected}","Date Range: ${sDate} to ${eDate}","Resolution: ${currentInterval.toUpperCase()}"`,
-                `""`
-            ];
-
-            const headers = [
-                "Timestamp", "Station_ID", "Station_Name",
-                "Temp_Avg_C", "Temp_High_C", "Temp_Low_C", "DewPoint_C",
-                "Humidity_Percent", "Interval_Precip_mm", "Precip_Rate_mm_hr",
-                "Wind_Speed_kmh", "Wind_Gust_kmh", "Wind_Direction_Deg", "Wind_Cardinal",
-                "Pressure_hPa", "UV_Index", "Solar_Radiation_Wm2"
-            ];
-
-            const rows = globalDataset.map(r => [
-                `"${r.timeLocal}"`, r.stationId, `"${r.stationName}"`,
-                r.temp ?? "", r.tempHigh ?? "", r.tempLow ?? "", r.dewpt ?? "",
-                r.humidity ?? "", r.precipTotal ?? "", r.precipRate ?? "",
-                r.windSpeed ?? "", r.windGust ?? "", r.winddir ?? "", degToCompass(r.winddir),
-                r.pressure ?? "", r.uv ?? "", r.solarRadiation ?? ""
-            ]);
-
-            const csvContent = preamble.join("\n") + "\n" + headers.join(",") + "\n" + rows.map(e => e.join(",")).join("\n");
-            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", `UOS_Meteo_${selected}_${currentInterval}_${sDate}_to_${eDate}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
-
-        // ============================================================================
-        // EXPORT HIGH-RESOLUTION CHART / WIND ROSE AS PNG OR FULL SCIENTIFIC PDF REPORT
-        // ============================================================================
-        function addPdfTablesAndFooter(pdf, isComp, startY, stationText, sDate, eDate) {
-            const pageW = pdf.internal.pageSize.getWidth();
-            const pageH = pdf.internal.pageSize.getHeight();
-            let nextY = startY;
-
-            if (!isComp) {
-                const selected = document.getElementById("stationSelect").value;
-                const valid = (p) => globalDataset.map(r => r[p]).filter(v => v !== null && !isNaN(v));
-                const mean = (arr) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : "--";
-                const max = (arr) => arr.length ? Math.max(...arr).toFixed(1) : "--";
-                const min = (arr) => arr.length ? Math.min(...arr).toFixed(1) : "--";
-
-                const stMap = {};
-                globalDataset.forEach(r => {
-                    if (!stMap[r.stationId]) stMap[r.stationId] = 0;
-                    stMap[r.stationId] += (r.precipTotal || 0);
-                });
-                const stCount = Object.keys(stMap).length || 1;
-                const rawSumP = Object.values(stMap).reduce((a, b) => a + b, 0);
-                const totalP = selected === "ALL" ? (rawSumP / stCount).toFixed(2) : rawSumP.toFixed(2);
-
-                pdf.setFontSize(10);
-                pdf.setTextColor(30, 58, 138);
-                pdf.text("Executive Period Summary Statistics", 10, nextY);
-
-                pdf.autoTable({
-                    startY: nextY + 2,
-                    margin: { left: 10, right: 10 },
-                    head: [[
-                        "Station / Network", "Period", "Intervals",
-                        "Temp Avg", "Temp Max", "Temp Min",
-                        "Humidity Avg", "Total Precip", "Wind Avg", "Max Gust", "Pressure Avg", "Max UV / Solar"
-                    ]],
-                    body: [[
-                        stationText, `${sDate} to ${eDate} (${currentInterval})`, globalDataset.length,
-                        `${mean(valid("temp"))} °C`, `${max(valid("tempHigh"))} °C`, `${min(valid("tempLow"))} °C`,
-                        `${mean(valid("humidity"))} %`, `${totalP} mm`,
-                        `${mean(valid("windSpeed"))} km/h`, `${max(valid("windGust"))} km/h`,
-                        `${mean(valid("pressure"))} hPa`, `${max(valid("uv"))} / ${max(valid("solarRadiation"))} W/m²`
-                    ]],
-                    styles: { fontSize: 7.5, cellPadding: 2 },
-                    headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' }
-                });
-
-                nextY = pdf.lastAutoTable.finalY + 6;
-                pdf.setFontSize(10);
-                pdf.setTextColor(30, 58, 138);
-                pdf.text(`Detailed Meteorological Telemetry Data Log (${globalDataset.length} Records)`, 10, nextY);
-
-                const tableRows = globalDataset.map(r => [
-                    r.timeLocal,
-                    r.stationName,
-                    r.temp ?? "--",
-                    r.tempHigh ?? "--",
-                    r.tempLow ?? "--",
-                    r.dewpt ?? "--",
-                    r.humidity ?? "--",
-                    r.precipTotal !== null && r.precipTotal !== undefined ? Number(r.precipTotal).toFixed(2) : "0.00",
-                    r.windSpeed ?? "--",
-                    r.windGust ?? "--",
-                    `${r.winddir ?? '--'}° (${degToCompass(r.winddir)})`,
-                    r.pressure ?? "--",
-                    `${r.uv ?? '--'} / ${r.solarRadiation ?? '--'}`
-                ]);
-
-                pdf.autoTable({
-                    startY: nextY + 2,
-                    margin: { left: 10, right: 10, bottom: 12 },
-                    head: [[
-                        "Timestamp", "Station", "Temp Avg (°C)", "Temp High (°C)", "Temp Low (°C)",
-                        "Dew Pt (°C)", "Humidity (%)", "Precip (mm)", "Wind (km/h)", "Gust (km/h)",
-                        "Wind Dir", "Pressure (hPa)", "UV / Solar (W/m²)"
-                    ]],
-                    body: tableRows,
-                    styles: { fontSize: 7, cellPadding: 1.5 },
-                    headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: 'bold' },
-                    alternateRowStyles: { fillColor: [241, 245, 249] }
+                    doc.autoTable({
+                        startY: yPos + 2.5,
+                        head,
+                        body,
+                        theme: 'striped',
+                        styles: { fontSize: 7, cellPadding: 1.5 },
+                        headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: 'bold' },
+                        margin: { left: 14, right: 14 }
+                    });
                 });
             } else {
-                const isThree = compResults.length === 3;
-                pdf.setFontSize(10);
-                pdf.setTextColor(30, 58, 138);
-                pdf.text("Multi-Period Climatic Comparison Summary Matrix", 10, nextY);
+                const sortedAll = sortRecordsArray(records, cfg.sortField, cfg.sortOrder);
+                let yPos = doc.lastAutoTable ? doc.lastAutoTable.finalY + 9 : 25;
+                if (yPos > 175) {
+                    doc.addPage();
+                    yPos = 16;
+                }
 
-                const matrixHead = [[
+                doc.setFontSize(10);
+                doc.setTextColor(30, 58, 138);
+                const titlePrefix = sectionLabel ? `[${sectionLabel}] ` : "";
+                doc.text(`${titlePrefix}Combined Station Interval Log (${sortedAll.length} Intervals — Sorted by ${sortLabel})`, 14, yPos);
+
+                const head = [["Station", ...dynCols.map(c => c.header)]];
+                const body = sortedAll.map(r => [`${r.stationName} (${r.stationId})`, ...dynCols.map(c => c.getter(r))]);
+
+                doc.autoTable({
+                    startY: yPos + 2.5,
+                    head,
+                    body,
+                    theme: 'striped',
+                    styles: { fontSize: 7, cellPadding: 1.5 },
+                    headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: 'bold' },
+                    margin: { left: 14, right: 14 }
+                });
+            }
+        }
+
+        // Helper: Build Dashboard Parameter Summary Rows filtered by user's checklist
+        function buildDashboardSummaryRowsFiltered(records, tableParamsSet) {
+            const valid = (p) => records.map(d => d[p]).filter(v => v !== null && !isNaN(v));
+            const mean = (arr) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : "--";
+            const max = (arr) => arr.length ? Math.max(...arr).toFixed(2) : "--";
+            const min = (arr) => arr.length ? Math.min(...arr).toFixed(2) : "--";
+            const sum = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0).toFixed(2) : "0.00";
+
+            const rows = [];
+            if (tableParamsSet.has("temp")) {
+                rows.push(["Temperature (°C)", min(valid("tempLow")), mean(valid("temp")), max(valid("tempHigh")), "--"]);
+            }
+            if (tableParamsSet.has("dewpt")) {
+                rows.push(["Dew Point (°C)", min(valid("dewpt")), mean(valid("dewpt")), max(valid("dewpt")), "--"]);
+            }
+            if (tableParamsSet.has("humidity")) {
+                rows.push(["Relative Humidity (%)", min(valid("humidity")), mean(valid("humidity")), max(valid("humidity")), "--"]);
+            }
+            if (tableParamsSet.has("precipTotal")) {
+                rows.push(["Interval Precipitation (mm)", min(valid("precipTotal")), mean(valid("precipTotal")), max(valid("precipTotal")), `${sum(valid("precipTotal"))} mm`]);
+            }
+            if (tableParamsSet.has("precipRate")) {
+                rows.push(["Precipitation Rate (mm/hr)", min(valid("precipRate")), mean(valid("precipRate")), max(valid("precipRate")), "--"]);
+            }
+            if (tableParamsSet.has("windSpeed")) {
+                rows.push(["Wind Speed (km/h)", min(valid("windSpeed")), mean(valid("windSpeed")), max(valid("windSpeed")), "--"]);
+                rows.push(["Wind Gust (km/h)", min(valid("windGust")), mean(valid("windGust")), max(valid("windGust")), "--"]);
+            }
+            if (tableParamsSet.has("winddir")) {
+                const avgD = mean(valid("winddir"));
+                rows.push(["Wind Direction (°)", min(valid("winddir")), `${avgD}° (${degToCompass(Number(avgD))})`, max(valid("winddir")), "--"]);
+            }
+            if (tableParamsSet.has("pressure")) {
+                rows.push(["Barometric Pressure (hPa)", min(valid("pressure")), mean(valid("pressure")), max(valid("pressure")), "--"]);
+            }
+            if (tableParamsSet.has("uvSolar")) {
+                rows.push(["UV Index", min(valid("uv")), mean(valid("uv")), max(valid("uv")), "--"]);
+                rows.push(["Solar Radiation (W/m²)", min(valid("solarRadiation")), mean(valid("solarRadiation")), max(valid("solarRadiation")), "--"]);
+            }
+            return rows;
+        }
+
+        // Helper: Append Per-Station Executive Summary Tables in PDF
+        function appendDashboardStationSummaryTables(doc, startY, cfg) {
+            let currentY = startY;
+            const selected = document.getElementById("stationSelect").value;
+
+            if (selected === "ALL" && cfg.separateStations) {
+                // Overall Areal Summary first, then each individual station
+                const arealRows = buildDashboardSummaryRowsFiltered(globalDataset, cfg.tableParams);
+                doc.setFontSize(10.5);
+                doc.setTextColor(30, 58, 138);
+                doc.text(`1. Network-Wide Executive Summary (${STATIONS.length} Stations Combined)`, 14, currentY);
+
+                doc.autoTable({
+                    startY: currentY + 2.5,
+                    head: [["Meteorological Parameter", "Minimum", "Mean / Avg", "Maximum", "Cumulative Total"]],
+                    body: arealRows,
+                    theme: 'grid',
+                    styles: { fontSize: 8, cellPadding: 2 },
+                    headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' },
+                    margin: { left: 14, right: 14 }
+                });
+
+                STATIONS.forEach((st, idx) => {
+                    const stRecords = globalDataset.filter(r => r.stationId === st.id);
+                    if (stRecords.length === 0) return;
+                    let yPos = doc.lastAutoTable.finalY + 8;
+                    if (yPos > 170) {
+                        doc.addPage();
+                        yPos = 16;
+                    }
+                    doc.setFontSize(10);
+                    doc.setTextColor(30, 58, 138);
+                    doc.text(`Station ${idx + 1} Summary: ${st.name} (${st.id}) — ${stRecords.length} Intervals`, 14, yPos);
+
+                    doc.autoTable({
+                        startY: yPos + 2.5,
+                        head: [["Parameter", "Minimum", "Mean / Avg", "Maximum", "Station Total"]],
+                        body: buildDashboardSummaryRowsFiltered(stRecords, cfg.tableParams),
+                        theme: 'grid',
+                        styles: { fontSize: 7.5, cellPadding: 1.8 },
+                        headStyles: { fillColor: [51, 65, 85], textColor: 255, fontStyle: 'bold' },
+                        margin: { left: 14, right: 14 }
+                    });
+                });
+            } else {
+                const stRows = buildDashboardSummaryRowsFiltered(globalDataset, cfg.tableParams);
+                doc.setFontSize(10.5);
+                doc.setTextColor(30, 58, 138);
+                doc.text("1. Executive Parameter Summary Table (Min / Mean / Max / Total)", 14, currentY);
+
+                doc.autoTable({
+                    startY: currentY + 2.5,
+                    head: [["Meteorological Parameter", "Minimum", "Mean / Average", "Maximum", "Cumulative Total"]],
+                    body: stRows,
+                    theme: 'grid',
+                    styles: { fontSize: 8, cellPadding: 2 },
+                    headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' },
+                    margin: { left: 14, right: 14 }
+                });
+            }
+        }
+
+        // ============================================================================
+        // PNG EXPORT & PDF TYPE 1 (SINGLE SELECTED GRAPH + CONFIGURED TABLES)
+        // ============================================================================
+        function exportChartImage(canvasId, filePrefix, format) {
+            const srcCanvas = document.getElementById(canvasId);
+            if (!srcCanvas) return;
+
+            const tempCanvas = document.createElement("canvas");
+            const headerHeight = 64;
+            tempCanvas.width = srcCanvas.width + 40;
+            tempCanvas.height = srcCanvas.height + headerHeight + 24;
+            const ctx = tempCanvas.getContext("2d");
+
+            const isDark = document.documentElement.classList.contains("dark");
+            ctx.fillStyle = isDark ? "#0f172a" : "#ffffff";
+            ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+            ctx.fillStyle = isDark ? "#f8fafc" : "#0f172a";
+            ctx.font = "bold 16px Inter, sans-serif";
+            ctx.fillText("Meteorological Center — University of Sulaimani (Dept. of Earth Sciences & Petroleum)", 20, 28);
+
+            ctx.fillStyle = isDark ? "#94a3b8" : "#475569";
+            ctx.font = "12px Inter, sans-serif";
+            const stName = document.getElementById("meta-name")?.textContent || "Sulaimani Network";
+            const startD = document.getElementById("startDate")?.value || "";
+            const endD = document.getElementById("endDate")?.value || "";
+            ctx.fillText(`Station: ${stName} | Range: ${startD} to ${endD} | Interval: ${currentInterval.toUpperCase()} | Developed by Hawber Ata`, 20, 48);
+
+            ctx.drawImage(srcCanvas, 20, headerHeight);
+
+            const dataUrl = tempCanvas.toDataURL("image/png", 1.0);
+            const a = document.createElement("a");
+            a.href = dataUrl;
+            a.download = `UOS_${filePrefix}_${startD}_${endD}.png`;
+            a.click();
+        }
+
+        async function generateSingleChartPDF(canvasId, filePrefix, mode, cfg) {
+            const srcCanvas = document.getElementById(canvasId);
+            if (!srcCanvas) return;
+
+            const tempCanvas = document.createElement("canvas");
+            const headerHeight = 64;
+            tempCanvas.width = srcCanvas.width + 40;
+            tempCanvas.height = srcCanvas.height + headerHeight + 24;
+            const ctx = tempCanvas.getContext("2d");
+
+            const isDark = document.documentElement.classList.contains("dark");
+            ctx.fillStyle = isDark ? "#0f172a" : "#ffffff";
+            ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+            ctx.fillStyle = isDark ? "#f8fafc" : "#0f172a";
+            ctx.font = "bold 16px Inter, sans-serif";
+            ctx.fillText("Meteorological Center — University of Sulaimani (Dept. of Earth Sciences & Petroleum)", 20, 28);
+
+            ctx.fillStyle = isDark ? "#94a3b8" : "#475569";
+            ctx.font = "12px Inter, sans-serif";
+            const stName = document.getElementById("meta-name")?.textContent || "Sulaimani Network";
+            const startD = document.getElementById("startDate")?.value || "";
+            const endD = document.getElementById("endDate")?.value || "";
+            ctx.fillText(`Station: ${stName} | Range: ${startD} to ${endD} | Interval: ${currentInterval.toUpperCase()} | Developed by Hawber Ata`, 20, 48);
+
+            ctx.drawImage(srcCanvas, 20, headerHeight);
+            const dataUrl = tempCanvas.toDataURL("image/png", 1.0);
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+            const pageW = doc.internal.pageSize.getWidth();
+            const imgW = pageW - 24;
+            const imgH = Math.min(115, (tempCanvas.height / tempCanvas.width) * imgW);
+            doc.addImage(dataUrl, "PNG", 12, 10, imgW, imgH);
+
+            if (mode === "compare" && compResults.length >= 2) {
+                const isThree = compResults.length === 3;
+                const head = [[
                     "Meteorological Parameter",
                     `${compResults[0].label} (${compResults[0].start} → ${compResults[0].end})`,
                     `${compResults[1].label} (${compResults[1].start} → ${compResults[1].end})`,
                     ...(isThree ? [`${compResults[2].label} (${compResults[2].start} → ${compResults[2].end})`] : []),
-                    `Delta (${compResults[0].label} vs ${compResults[1].label})`
+                    "Net Change (P1 vs P2)"
                 ]];
 
-                const rowsSpec = [
-                    ["Average Temperature (°C)", "tempAvg", "°C"],
-                    ["Maximum Temperature (°C)", "tempMax", "°C"],
-                    ["Minimum Temperature (°C)", "tempMin", "°C"],
-                    ["Mean Dew Point (°C)", "dewAvg", "°C"],
-                    ["Mean Relative Humidity (%)", "humAvg", "%"],
-                    ["Total Accumulated Precipitation (mm)", "precipTotal", "mm"],
-                    ["Maximum Interval Rainfall (mm)", "precipMaxInterval", "mm"],
-                    ["Mean Wind Speed (km/h)", "windAvg", "km/h"],
-                    ["Maximum Wind Gust (km/h)", "windMaxGust", "km/h"],
-                    ["Mean Barometric Pressure (hPa)", "pressAvg", "hPa"],
-                    ["Maximum UV Index", "uvMax", ""],
-                    ["Peak Solar Radiation (W/m²)", "solarMax", "W/m²"]
-                ];
-
-                const matrixBody = rowsSpec.map(([label, key, unit]) => {
-                    const v1 = compResults[0].summary[key];
-                    const v2 = compResults[1].summary[key];
-                    const v3 = isThree ? compResults[2].summary[key] : null;
+                const allRows = getComparisonMatrixDefinitions().filter(r => cfg.tableParams.has(r.key));
+                const body = allRows.map(r => {
+                    const v1 = compResults[0].stats[r.prop];
+                    const v2 = compResults[1].stats[r.prop];
+                    const v3 = isThree ? compResults[2].stats[r.prop] : null;
                     let diffStr = "--";
                     if (v1 !== null && v2 !== null && !isNaN(v1) && !isNaN(v2)) {
                         const d = (v1 - v2).toFixed(2);
-                        diffStr = `${d > 0 ? '+' : ''}${d} ${unit}`;
+                        diffStr = `${d >= 0 ? '+' : ''}${d} ${r.unit}`;
                     }
                     return [
-                        label,
-                        `${v1 ?? '--'} ${unit}`,
-                        `${v2 ?? '--'} ${unit}`,
-                        ...(isThree ? [`${v3 ?? '--'} ${unit}`] : []),
+                        `${r.name} (${r.unit})`,
+                        `${v1 ?? '--'} ${r.unit}`,
+                        `${v2 ?? '--'} ${r.unit}`,
+                        ...(isThree ? [`${v3 ?? '--'} ${r.unit}`] : []),
                         diffStr
                     ];
                 });
 
-                pdf.autoTable({
-                    startY: nextY + 2,
-                    margin: { left: 10, right: 10, bottom: 12 },
-                    head: matrixHead,
-                    body: matrixBody,
+                doc.setFontSize(10);
+                doc.setTextColor(30, 58, 138);
+                doc.text("Multi-Period Parameter Summary & Net Change Matrix", 12, imgH + 17);
+
+                doc.autoTable({
+                    startY: imgH + 20,
+                    head,
+                    body,
+                    theme: 'grid',
                     styles: { fontSize: 7.5, cellPadding: 1.8 },
                     headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' },
-                    alternateRowStyles: { fillColor: [241, 245, 249] }
+                    margin: { left: 12, right: 12 }
                 });
-            }
 
-            const totalPages = pdf.internal.getNumberOfPages();
-            for (let p = 1; p <= totalPages; p++) {
-                pdf.setPage(p);
-                pdf.setFontSize(8);
-                pdf.setTextColor(100, 116, 139);
-                pdf.text(
-                    `Meteorological Center — University of Sulaimani (College of Science) • Developed by Hawber Ata • Page ${p} of ${totalPages}`,
-                    pageW / 2,
-                    pageH - 5,
-                    { align: "center" }
-                );
-            }
-        }
-
-        function exportChartImage(canvasId, filePrefix, format = "png") {
-            const sourceCanvas = document.getElementById(canvasId);
-            if (!sourceCanvas) return;
-
-            const isDark = document.documentElement.classList.contains("dark");
-            const bannerHeight = 82;
-            const padding = 20;
-
-            const outCanvas = document.createElement("canvas");
-            outCanvas.width = sourceCanvas.width + padding * 2;
-            outCanvas.height = sourceCanvas.height + bannerHeight + padding;
-            const ctx = outCanvas.getContext("2d");
-
-            ctx.fillStyle = isDark ? "#0f172a" : "#ffffff";
-            ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
-
-            ctx.fillStyle = isDark ? "#f8fafc" : "#0f172a";
-            ctx.font = "bold 16px Inter, sans-serif";
-            ctx.fillText("Meteorological Center — University of Sulaimani (College of Science)", padding, 28);
-
-            const isComp = (canvasId === "compOverlayChart" || canvasId === "compBarChartLeft" || canvasId === "compBarChartRight");
-            const stSelect = document.getElementById(isComp ? "compStationSelect" : "stationSelect");
-            const stationText = stSelect.options[stSelect.selectedIndex].text;
-
-            let paramText = "Climatic Analytics Diagram";
-            let periodText = "";
-
-            if (canvasId === "weatherChart") {
-                const paramSelect = document.getElementById("paramSelect");
-                paramText = paramSelect.options[paramSelect.selectedIndex].text;
-                const sDate = document.getElementById("startDate").value;
-                const eDate = document.getElementById("endDate").value;
-                periodText = `Period: ${sDate} to ${eDate} (${currentInterval.toUpperCase()} interval)`;
-            } else if (canvasId === "compOverlayChart") {
-                const compParamSel = document.getElementById("compParamSelect");
-                paramText = compParamSel.options[compParamSel.selectedIndex].text;
-                periodText = compResults.map(p => `${p.label} (${p.start} to ${p.end})`).join("  vs  ");
-            } else {
-                const sDate = document.getElementById("startDate").value;
-                const eDate = document.getElementById("endDate").value;
-                periodText = `Period: ${sDate} to ${eDate}`;
-            }
-
-            ctx.fillStyle = isDark ? "#38bdf8" : "#2563eb";
-            ctx.font = "bold 13px Inter, sans-serif";
-            ctx.fillText(`${stationText}  |  ${paramText}`, padding, 50);
-
-            ctx.fillStyle = isDark ? "#94a3b8" : "#64748b";
-            ctx.font = "11px Inter, sans-serif";
-            ctx.fillText(`${periodText}  •  Developed by Hawber Ata`, padding, 68);
-
-            ctx.drawImage(sourceCanvas, padding, bannerHeight);
-
-            const sDate = document.getElementById("startDate").value;
-            const eDate = document.getElementById("endDate").value;
-            const baseFileName = `UOS_${filePrefix}_${stSelect.value}_${sDate}_to_${eDate}`;
-
-            if (format === "pdf" && window.jspdf && window.jspdf.jsPDF) {
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-                const pageW = pdf.internal.pageSize.getWidth();
-                const maxChartH = 104;
-                const aspect = outCanvas.width / outCanvas.height;
-                let drawW = pageW - 20;
-                let drawH = drawW / aspect;
-                if (drawH > maxChartH) {
-                    drawH = maxChartH;
-                    drawW = drawH * aspect;
+                if (cfg.includeIntervalLog) {
+                    compResults.forEach(p => {
+                        appendIntervalTablesToPdf(doc, p.stats.rawRecords || p.stats.series, cfg, p.label);
+                    });
                 }
-                const drawX = (pageW - drawW) / 2;
-                const imgData = outCanvas.toDataURL("image/png", 1.0);
-                pdf.addImage(imgData, "PNG", drawX, 10, drawW, drawH);
-
-                addPdfTablesAndFooter(pdf, isComp, 10 + drawH + 7, stationText, sDate, eDate);
-                pdf.save(`${baseFileName}.pdf`);
-            } else {
-                const link = document.createElement("a");
-                link.download = `${baseFileName}.png`;
-                link.href = outCanvas.toDataURL("image/png", 1.0);
-                link.click();
+            } else if (globalDataset.length > 0) {
+                appendDashboardStationSummaryTables(doc, imgH + 17, cfg);
+                appendIntervalTablesToPdf(doc, globalDataset, cfg);
             }
+
+            doc.save(`UOS_${filePrefix}_${startD}_${endD}.pdf`);
         }
 
         // ============================================================================
-        // PDF TYPE 2: ALL-PARAMETERS 3×3 MULTI-CHART GRID REPORT + DATA TABLES
+        // PDF TYPE 2: OFF-SCREEN CHART RENDERER FOR CONFIGURABLE 3x3 GRID PDF REPORTS
         // ============================================================================
-        async function exportAllParamsGridPDF(mode = 'dashboard') {
-            const isComp = (mode === 'compare');
-            if (!isComp && globalDataset.length === 0) {
-                alert("No telemetry data loaded to generate the 3×3 report!");
-                return;
-            }
-            if (isComp && compResults.length === 0) {
-                alert("Please run a comparison first!");
-                return;
-            }
+        async function createOffscreenChartDataUrl(chartType, data, options, width = 820, height = 430) {
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
 
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-            const pageW = pdf.internal.pageSize.getWidth();
-
-            const stSelect = document.getElementById(isComp ? "compStationSelect" : "stationSelect");
-            const stationText = stSelect.options[stSelect.selectedIndex].text;
-            const sDate = document.getElementById("startDate").value;
-            const eDate = document.getElementById("endDate").value;
-
-            // Page 1 Header Banner
-            pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(13);
-            pdf.setTextColor(30, 58, 138);
-            pdf.text("METEOROLOGICAL CENTER — UNIVERSITY OF SULAIMANI (COLLEGE OF SCIENCE)", 10, 12);
-
-            pdf.setFontSize(9.5);
-            pdf.setTextColor(37, 99, 235);
-            const subLine = isComp
-                ? `Complete 9-Parameter 3×3 Climatic Comparison Grid  |  ${stationText}  |  ${compResults.map(p => p.label).join(" vs ")}`
-                : `Complete 9-Parameter 3×3 Telemetry Grid  |  ${stationText}  |  Period: ${sDate} to ${eDate} (${currentInterval.toUpperCase()})`;
-            pdf.text(subLine, 10, 18);
-
-            // 9 Core Parameters arranged in a 3×3 Grid
-            const gridParams = [
-                { key: "temp",           title: "1. Temperature (Min / Avg / Max °C)", color: "#f97316" },
-                { key: "precipTotal",    title: "2. Precipitation (mm)",               color: "#2563eb" },
-                { key: "humidity",       title: "3. Relative Humidity (%)",            color: "#0ea5e9" },
-                { key: "dewpt",          title: "4. Dew Point (°C)",                   color: "#06b6d4" },
-                { key: "windSpeed",      title: "5. Wind Speed & Gust (km/h)",         color: "#14b8a6" },
-                { key: "winddir",        title: "6. Wind Direction (°)",               color: "#6366f1" },
-                { key: "pressure",       title: "7. Barometric Pressure (hPa)",        color: "#8b5cf6" },
-                { key: "uv",             title: "8. UV Index",                         color: "#eab308" },
-                { key: "solarRadiation", title: "9. Solar Radiation (W/m²)",           color: "#f59e0b" }
-            ];
-
-            const cols = 3;
-            const marginX = 10;
-            const startGridY = 22;
-            const gapX = 4;
-            const gapY = 4;
-            const cellW = (pageW - marginX * 2 - gapX * (cols - 1)) / cols;
-            const cellH = 56;
-
-            const offCanvas = document.createElement("canvas");
-            offCanvas.width = 680;
-            offCanvas.height = 380;
-
-            const calcStats = (arr, k) => {
-                const v = arr.map(r => r[k]).filter(n => n !== null && !isNaN(n));
-                if (!v.length) return { max: "--", min: "--", avg: "--", sum: "0.00" };
-                const s = v.reduce((a, b) => a + b, 0);
-                return {
-                    max: Math.max(...v).toFixed(1),
-                    min: Math.min(...v).toFixed(1),
-                    avg: (s / v.length).toFixed(1),
-                    sum: s.toFixed(2)
-                };
+            const bgPlugin = {
+                id: 'whiteBg',
+                beforeDraw(chart) {
+                    const { ctx, width, height } = chart;
+                    ctx.save();
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(0, 0, width, height);
+                    ctx.restore();
+                }
             };
 
-            for (let idx = 0; idx < gridParams.length; idx++) {
-                const gp = gridParams[idx];
-                const meta = PARAM_META[gp.key] || { label: gp.key, unit: "" };
-                const rIdx = Math.floor(idx / cols);
-                const cIdx = idx % cols;
-                const xPos = marginX + cIdx * (cellW + gapX);
-                const yPos = startGridY + rIdx * (cellH + gapY);
+            const finalOptions = {
+                ...options,
+                responsive: false,
+                animation: false,
+                devicePixelRatio: 2
+            };
 
-                const oCtx = offCanvas.getContext("2d");
-                oCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
+            const chart = new Chart(ctx, {
+                type: chartType,
+                data: data,
+                options: finalOptions,
+                plugins: [bgPlugin]
+            });
 
-                let labels = [];
-                let datasets = [];
-                let statsLines = [];
-                const isBar = (gp.key === "precipTotal");
+            chart.update();
+            const url = canvas.toDataURL("image/png", 1.0);
+            chart.destroy();
+            return url;
+        }
 
-                if (!isComp) {
-                    if (stSelect.value === "ALL") {
+        // DASHBOARD 3x3 ALL-PARAMETERS PDF REPORT (WITH USER CHECKLIST & SORTED STATION TABLES)
+        async function exportDashboardAllParamsPDF(cfg) {
+            const badge = document.getElementById("statusBadge");
+            const oldHtml = badge.innerHTML;
+            badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Building PDF...`;
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+                const pageW = doc.internal.pageSize.getWidth();
+
+                const selectedStation = document.getElementById("stationSelect").value;
+                const stName = document.getElementById("meta-name")?.textContent || "Sulaimani Network";
+                const startD = document.getElementById("startDate")?.value || "";
+                const endD = document.getElementById("endDate")?.value || "";
+
+                const gridParams = cfg.graphParams;
+
+                const calcStats = (records, key) => {
+                    const vals = records.map(r => r[key]).filter(v => v !== null && !isNaN(v));
+                    if (!vals.length) return { max: "--", min: "--", avg: "--", sum: "0.00" };
+                    const max = Math.max(...vals);
+                    const min = Math.min(...vals);
+                    const sum = vals.reduce((a, b) => a + b, 0);
+                    return { max: max.toFixed(1), min: min.toFixed(1), avg: (sum / vals.length).toFixed(1), sum: sum.toFixed(2) };
+                };
+
+                // Render up to 9 charts per page in a 3x3 grid
+                for (let i = 0; i < gridParams.length; i++) {
+                    if (i > 0 && i % 9 === 0) doc.addPage();
+
+                    if (i % 9 === 0) {
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(13);
+                        doc.setTextColor(30, 58, 138);
+                        doc.text("Meteorological Center — University of Sulaimani (Dept. of Earth Sciences & Petroleum)", 12, 11);
+
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(9);
+                        doc.setTextColor(71, 85, 105);
+                        doc.text(`Multi-Parameter Graphical Report (${gridParams.length} Selected) | Station: ${stName} | Period: ${startD} to ${endD} | Interval: ${currentInterval.toUpperCase()} | Developed by Hawber Ata`, 12, 16.5);
+                    }
+
+                    const param = gridParams[i];
+                    const meta = PARAM_META[param] || { label: param, unit: "" };
+                    const isBar = (param === "precipTotal");
+                    let labels = [];
+                    let datasets = [];
+                    let statsLines = [];
+
+                    if (selectedStation === "ALL") {
                         labels = [...new Set(globalDataset.map(d => d.timeLocal))].sort();
                         STATIONS.forEach(st => {
                             const stData = globalDataset.filter(d => d.stationId === st.id);
                             if (!stData.length) return;
-                            const stS = calcStats(stData, gp.key);
+                            const stStats = calcStats(stData, param);
                             const mapObj = {};
-                            stData.forEach(d => mapObj[d.timeLocal] = d[gp.key]);
+                            stData.forEach(d => mapObj[d.timeLocal] = d[param]);
                             datasets.push({
                                 label: st.name,
                                 data: labels.map(l => mapObj[l] ?? null),
@@ -2913,114 +3066,420 @@
                             });
                             statsLines.push({
                                 color: st.color,
-                                text: gp.key === "precipTotal"
-                                    ? `${st.name.slice(0, 10)}: ${stS.sum} mm`
-                                    : `${st.name.slice(0, 10)}: ${stS.max}/${stS.min}${meta.unit}`
+                                text: param === "precipTotal"
+                                    ? `${st.name}: ${stStats.sum}mm`
+                                    : `${st.name}: H:${stStats.max} L:${stStats.min}`
                             });
                         });
                     } else {
                         labels = globalDataset.map(d => d.timeLocal);
-                        const sStats = calcStats(globalDataset, gp.key);
-                        if (gp.key === "temp") {
+                        const st = STATIONS.find(s => s.id === selectedStation) || STATIONS[0];
+                        if (param === "temp") {
                             const hiS = calcStats(globalDataset, "tempHigh");
+                            const avS = calcStats(globalDataset, "temp");
                             const loS = calcStats(globalDataset, "tempLow");
-                            datasets.push({ label: "Max °C", data: globalDataset.map(d => d.tempHigh), borderColor: "#f43f5e", borderWidth: 1.4, pointRadius: 0 });
-                            datasets.push({ label: "Avg °C", data: globalDataset.map(d => d.temp), borderColor: gp.color, backgroundColor: gp.color + "20", borderWidth: 2, pointRadius: 0, fill: true });
-                            datasets.push({ label: "Min °C", data: globalDataset.map(d => d.tempLow), borderColor: "#06b6d4", borderWidth: 1.4, pointRadius: 0 });
+                            datasets.push(
+                                { label: `Max (${hiS.max}°C)`, data: globalDataset.map(d => d.tempHigh), borderColor: "#f43f5e", borderWidth: 1.5, pointRadius: 0 },
+                                { label: `Avg (${avS.avg}°C)`, data: globalDataset.map(d => d.temp), borderColor: st.color, backgroundColor: st.color + "20", borderWidth: 2, pointRadius: 0, fill: true },
+                                { label: `Min (${loS.min}°C)`, data: globalDataset.map(d => d.tempLow), borderColor: "#06b6d4", borderWidth: 1.5, pointRadius: 0 }
+                            );
                             statsLines = [
                                 { color: "#f43f5e", text: `Max: ${hiS.max} °C` },
-                                { color: gp.color,  text: `Avg: ${sStats.avg} °C` },
+                                { color: st.color,  text: `Avg: ${avS.avg} °C` },
                                 { color: "#06b6d4", text: `Min: ${loS.min} °C` }
                             ];
-                        } else if (gp.key === "precipTotal") {
-                            datasets.push({ label: "Precip (mm)", data: globalDataset.map(d => d.precipTotal), backgroundColor: "#2563eb", borderColor: "#1d4ed8", borderWidth: 1.5 });
-                            statsLines = [
-                                { color: "#2563eb", text: `Total: ${sStats.sum} mm` },
-                                { color: "#38bdf8", text: `Max: ${sStats.max} mm` },
-                                { color: "#94a3b8", text: `Min: ${sStats.min} mm` }
-                            ];
                         } else {
-                            datasets.push({ label: `${meta.label} (${meta.unit})`, data: globalDataset.map(d => d[gp.key]), borderColor: gp.color, backgroundColor: gp.color + "25", borderWidth: 2, pointRadius: 0, fill: true });
-                            statsLines = [
-                                { color: "#f43f5e", text: `Max: ${sStats.max} ${meta.unit}` },
-                                { color: gp.color,  text: `Avg: ${sStats.avg} ${meta.unit}` },
-                                { color: "#06b6d4", text: `Min: ${sStats.min} ${meta.unit}` }
-                            ];
-                            if (gp.key === "windSpeed") {
+                            const pS = calcStats(globalDataset, param);
+                            datasets.push({
+                                label: `${meta.label} (${meta.unit})`,
+                                data: globalDataset.map(d => d[param]),
+                                borderColor: st.color,
+                                backgroundColor: isBar ? "#2563eb" : st.color + "25",
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                fill: !isBar
+                            });
+                            statsLines = param === "precipTotal"
+                                ? [{ color: "#2563eb", text: `Total: ${pS.sum} mm` }, { color: "#38bdf8", text: `Max: ${pS.max} mm` }]
+                                : [{ color: "#f43f5e", text: `Max: ${pS.max} ${meta.unit}` }, { color: st.color, text: `Avg: ${pS.avg} ${meta.unit}` }, { color: "#06b6d4", text: `Min: ${pS.min} ${meta.unit}` }];
+
+                            if (param === "windSpeed") {
                                 const gS = calcStats(globalDataset, "windGust");
-                                datasets.push({ label: "Gust", data: globalDataset.map(d => d.windGust), borderColor: "#f43f5e", borderDash: [3, 3], borderWidth: 1.3, pointRadius: 0 });
+                                datasets.push({
+                                    label: `Gust (${gS.max} km/h)`,
+                                    data: globalDataset.map(d => d.windGust),
+                                    borderColor: "#f43f5e",
+                                    borderDash: [3, 3],
+                                    borderWidth: 1.3,
+                                    pointRadius: 0
+                                });
                                 statsLines.push({ color: "#f43f5e", text: `Gust: ${gS.max} km/h` });
                             }
                         }
                     }
-                } else {
-                    const maxLen = Math.max(...compResults.map(p => p.summary.series.length), 1);
-                    labels = Array.from({ length: maxLen }, (_, i) => `${i + 1}`);
-                    compResults.forEach(p => {
-                        const sStats = calcStats(p.summary.series, gp.key);
-                        const totP = (p.summary.precipTotal ?? 0).toFixed(1);
-                        datasets.push({
-                            label: p.label,
-                            data: p.summary.series.map(r => r[gp.key]),
-                            borderColor: p.color,
-                            backgroundColor: isBar ? p.color + "BB" : p.color + "20",
-                            borderWidth: 2,
-                            pointRadius: 0
-                        });
+
+                    const imgUrl = await createOffscreenChartDataUrl(
+                        isBar ? "bar" : "line",
+                        { labels, datasets },
+                        {
+                            layout: { padding: { top: 8, right: 175, left: 6, bottom: 4 } },
+                            plugins: {
+                                title: { display: true, text: `${meta.label} (${meta.unit || 'Index'})`, color: "#0f172a", font: { size: 13, weight: "bold" } },
+                                legend: { labels: { color: "#334155", font: { size: 9, weight: "bold" }, boxWidth: 10 } },
+                                inChartStatsBoxPlugin: {
+                                    forceLight: true,
+                                    title: `${meta.label}`,
+                                    lines: statsLines
+                                }
+                            },
+                            scales: {
+                                x: { ticks: { color: "#475569", maxTicksLimit: 6, font: { size: 8 } }, grid: { color: "rgba(15,23,42,0.07)" } },
+                                y: { ticks: { color: "#475569", font: { size: 9 } }, grid: { color: "rgba(15,23,42,0.07)" } }
+                            }
+                        }
+                    );
+
+                    const slot = i % 9;
+                    const col = slot % 3;
+                    const row = Math.floor(slot / 3);
+                    const cellW = 89;
+                    const cellH = 57;
+                    const x = 12 + col * (cellW + 3);
+                    const y = 21 + row * (cellH + 3);
+
+                    doc.setDrawColor(203, 213, 225);
+                    doc.rect(x, y, cellW, cellH);
+                    doc.addImage(imgUrl, "PNG", x + 0.5, y + 0.5, cellW - 1, cellH - 1);
+                }
+
+                // Page 2+: Configured Summary & Station-Sorted Interval Tables
+                doc.addPage();
+                appendDashboardStationSummaryTables(doc, 15, cfg);
+                appendIntervalTablesToPdf(doc, globalDataset, cfg);
+
+                doc.save(`UOS_Configured_Grid_Report_${startD}_${endD}.pdf`);
+            } finally {
+                badge.innerHTML = oldHtml;
+            }
+        }
+
+        // COMPARISON 3x3 ALL-PARAMETERS PDF REPORT (WITH USER CHECKLIST & SORTED STATION TABLES)
+        async function exportComparisonAllParamsPDF(cfg) {
+            const badge = document.getElementById("statusBadge");
+            const oldHtml = badge.innerHTML;
+            badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Building PDF...`;
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+
+                const gridParams = cfg.graphParams;
+                const maxLen = Math.max(...compResults.map(r => r.stats.series.length), 1);
+                const longestPeriod = compResults.find(r => r.stats.series.length === maxLen) || compResults[0];
+                const labels = longestPeriod.stats.series.map((item, idx) => {
+                    if (item.timeLocal.length === 7) {
+                        const mNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                        return mNames[parseInt(item.timeLocal.slice(5, 7), 10) - 1] || `M${idx + 1}`;
+                    }
+                    return item.timeLocal.slice(5);
+                });
+
+                for (let i = 0; i < gridParams.length; i++) {
+                    if (i > 0 && i % 9 === 0) doc.addPage();
+
+                    if (i % 9 === 0) {
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(13);
+                        doc.setTextColor(30, 58, 138);
+                        doc.text("Meteorological Center — University of Sulaimani • Multi-Period Comparison Suite", 12, 11);
+
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(9);
+                        doc.setTextColor(71, 85, 105);
+                        const pDesc = compResults.map(p => `${p.label} (${p.start}→${p.end})`).join(" vs ");
+                        doc.text(`Periods: ${pDesc} | Developed by Hawber Ata`, 12, 16.5);
+                    }
+
+                    const param = gridParams[i];
+                    const meta = PARAM_META[param] || { label: param, unit: "" };
+                    const isBar = (param === "precipTotal");
+                    let statsLines = [];
+
+                    const datasets = compResults.map(p => {
+                        const sVals = p.stats.series.map(x => x[param]).filter(v => v !== null && !isNaN(v));
+                        const sMax = sVals.length ? Math.max(...sVals).toFixed(1) : "--";
+                        const sMin = sVals.length ? Math.min(...sVals).toFixed(1) : "--";
                         statsLines.push({
                             color: p.color,
-                            text: gp.key === "precipTotal"
-                                ? `${p.label}: ${totP} mm`
-                                : `${p.label}: ${sStats.max}/${sStats.min}${meta.unit}`
+                            text: param === "precipTotal"
+                                ? `${p.label}: ${p.stats.precipTotal}mm`
+                                : `${p.label}: H:${sMax} L:${sMin}`
                         });
+                        return {
+                            label: p.label,
+                            data: p.stats.series.map(x => x[param]),
+                            borderColor: p.color,
+                            backgroundColor: isBar ? p.color + "BB" : p.color + "22",
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            tension: 0.25,
+                            fill: !isBar
+                        };
+                    });
+
+                    const imgUrl = await createOffscreenChartDataUrl(
+                        isBar ? "bar" : "line",
+                        { labels, datasets },
+                        {
+                            layout: { padding: { top: 8, right: 175, left: 6, bottom: 4 } },
+                            plugins: {
+                                title: { display: true, text: `${meta.label} (${meta.unit || 'Index'})`, color: "#0f172a", font: { size: 13, weight: "bold" } },
+                                legend: { labels: { color: "#334155", font: { size: 9, weight: "bold" }, boxWidth: 10 } },
+                                inChartStatsBoxPlugin: {
+                                    forceLight: true,
+                                    title: `${meta.label}`,
+                                    lines: statsLines
+                                }
+                            },
+                            scales: {
+                                x: { ticks: { color: "#475569", maxTicksLimit: 6, font: { size: 8 } }, grid: { color: "rgba(15,23,42,0.07)" } },
+                                y: { ticks: { color: "#475569", font: { size: 9 } }, grid: { color: "rgba(15,23,42,0.07)" } }
+                            }
+                        }
+                    );
+
+                    const slot = i % 9;
+                    const col = slot % 3;
+                    const row = Math.floor(slot / 3);
+                    const cellW = 89;
+                    const cellH = 57;
+                    const x = 12 + col * (cellW + 3);
+                    const y = 21 + row * (cellH + 3);
+
+                    doc.setDrawColor(203, 213, 225);
+                    doc.rect(x, y, cellW, cellH);
+                    doc.addImage(imgUrl, "PNG", x + 0.5, y + 0.5, cellW - 1, cellH - 1);
+                }
+
+                // Page 2+: Complete Comparison Matrix & Configured Interval Tables
+                doc.addPage();
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(12);
+                doc.setTextColor(30, 58, 138);
+                doc.text("1. Multi-Period Parameter Comparison Matrix & Deltas", 14, 15);
+
+                const isThree = compResults.length === 3;
+                const head = [[
+                    "Meteorological Parameter",
+                    `${compResults[0].label} (${compResults[0].start} → ${compResults[0].end})`,
+                    `${compResults[1].label} (${compResults[1].start} → ${compResults[1].end})`,
+                    ...(isThree ? [`${compResults[2].label} (${compResults[2].start} → ${compResults[2].end})`] : []),
+                    "Net Change (P1 vs P2)"
+                ]];
+
+                const allRows = getComparisonMatrixDefinitions().filter(r => cfg.tableParams.has(r.key));
+                const body = allRows.map(r => {
+                    const v1 = compResults[0].stats[r.prop];
+                    const v2 = compResults[1].stats[r.prop];
+                    const v3 = isThree ? compResults[2].stats[r.prop] : null;
+                    let diffStr = "--";
+                    if (v1 !== null && v2 !== null && !isNaN(v1) && !isNaN(v2)) {
+                        const d = (v1 - v2).toFixed(2);
+                        diffStr = `${d >= 0 ? '+' : ''}${d} ${r.unit}`;
+                    }
+                    return [
+                        `${r.name} (${r.unit})`,
+                        `${v1 ?? '--'} ${r.unit}`,
+                        `${v2 ?? '--'} ${r.unit}`,
+                        ...(isThree ? [`${v3 ?? '--'} ${r.unit}`] : []),
+                        diffStr
+                    ];
+                });
+
+                doc.autoTable({
+                    startY: 19,
+                    head,
+                    body,
+                    theme: 'grid',
+                    styles: { fontSize: 8.5, cellPadding: 2.2 },
+                    headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' },
+                    margin: { left: 14, right: 14 }
+                });
+
+                if (cfg.includeIntervalLog) {
+                    compResults.forEach(p => {
+                        appendIntervalTablesToPdf(doc, p.stats.rawRecords || p.stats.series, cfg, p.label);
                     });
                 }
 
-                const tempChart = new Chart(oCtx, {
-                    type: isBar ? "bar" : "line",
-                    data: { labels, datasets },
-                    options: {
-                        animation: false,
-                        responsive: false,
-                        layout: { padding: { top: 8, right: 175, bottom: 4, left: 4 } },
-                        plugins: {
-                            title: { display: true, text: gp.title, color: "#0f172a", font: { size: 13, weight: "bold" }, align: "start" },
-                            legend: { display: true, labels: { color: "#334155", boxWidth: 10, font: { size: 9.5, weight: "bold" } } },
-                            inChartStatsBoxPlugin: {
-                                forceLight: true,
-                                title: "Summary",
-                                lines: statsLines
-                            }
-                        },
-                        scales: {
-                            x: { ticks: { color: "#475569", maxTicksLimit: 6, font: { size: 8.5 } }, grid: { color: "rgba(15,23,42,0.06)" } },
-                            y: { ticks: { color: "#475569", font: { size: 9 } }, grid: { color: "rgba(15,23,42,0.06)" } }
-                        }
-                    }
-                });
+                doc.save(`UOS_Comparison_Configured_Report.pdf`);
+            } finally {
+                badge.innerHTML = oldHtml;
+            }
+        }
 
-                const cardCanvas = document.createElement("canvas");
-                cardCanvas.width = offCanvas.width;
-                cardCanvas.height = offCanvas.height;
-                const cCtx = cardCanvas.getContext("2d");
-                cCtx.fillStyle = "#ffffff";
-                cCtx.fillRect(0, 0, cardCanvas.width, cardCanvas.height);
-                cCtx.strokeStyle = "#cbd5e1";
-                cCtx.lineWidth = 2;
-                cCtx.strokeRect(1, 1, cardCanvas.width - 2, cardCanvas.height - 2);
-                cCtx.drawImage(offCanvas, 0, 0);
-
-                const cellImg = cardCanvas.toDataURL("image/png", 1.0);
-                pdf.addImage(cellImg, "PNG", xPos, yPos, cellW, cellH);
-                tempChart.destroy();
+        // ============================================================================
+        // EXCEL (.XLSX) & CSV EXPORT FUNCTIONS
+        // ============================================================================
+        function exportToExcel() {
+            if (globalDataset.length === 0) {
+                alert("No weather data loaded to export.");
+                return;
             }
 
-            // Add Page 2+ with Executive Summary & Complete Data Table
-            pdf.addPage();
-            addPdfTablesAndFooter(pdf, isComp, 15, stationText, sDate, eDate);
+            const wb = XLSX.utils.book_new();
+            const start = document.getElementById("startDate").value;
+            const end = document.getElementById("endDate").value;
 
-            const fileTag = isComp ? "Comparison_All9Params_3x3" : "All9Params_3x3_Report";
-            pdf.save(`UOS_${fileTag}_${stSelect.value}_${sDate}_to_${eDate}.pdf`);
+            const summaryRows = [
+                ["Meteorological Center — University of Sulaimani (Dept. of Earth Sciences & Petroleum)"],
+                ["Developed by Hawber Ata"],
+                ["Date Range", `${start} to ${end}`, "Sampling Interval", currentInterval.toUpperCase()],
+                [],
+                ["Station ID", "Station Name", "Intervals", "Mean Temp (°C)", "Max Temp (°C)", "Min Temp (°C)", "Mean Dew Point (°C)", "Mean Humidity (%)", "Total Precip (mm)", "Max Precip Rate (mm/h)", "Mean Wind (km/h)", "Max Gust (km/h)", "Mean Pressure (hPa)", "Max UV", "Peak Solar (W/m²)"]
+            ];
+
+            STATIONS.forEach(st => {
+                const recs = globalDataset.filter(r => r.stationId === st.id);
+                if (recs.length === 0) return;
+                const s = computePeriodSummary(recs, false);
+                summaryRows.push([
+                    st.id, st.name, s.count, s.tempAvg, s.tempMax, s.tempMin, s.dewAvg,
+                    s.humAvg, s.precipTotal, s.precipRateMax, s.windAvg, s.windMaxGust,
+                    s.pressAvg, s.uvMax, s.solarMax
+                ]);
+            });
+
+            const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Executive Summary");
+
+            const logRows = globalDataset.map(r => ({
+                "Timestamp": r.timeLocal,
+                "Station ID": r.stationId,
+                "Station Name": r.stationName,
+                "Temp Avg (°C)": r.temp,
+                "Temp Max (°C)": r.tempHigh,
+                "Temp Min (°C)": r.tempLow,
+                "Dew Point (°C)": r.dewpt,
+                "Humidity (%)": r.humidity,
+                "Interval Precip (mm)": r.precipTotal,
+                "Precip Rate (mm/hr)": r.precipRate,
+                "Wind Speed (km/h)": r.windSpeed,
+                "Wind Gust (km/h)": r.windGust,
+                "Wind Dir (°)": r.winddir,
+                "Wind Sector": degToCompass(r.winddir),
+                "Pressure (hPa)": r.pressure,
+                "UV Index": r.uv,
+                "Solar Radiation (W/m²)": r.solarRadiation
+            }));
+
+            const wsLog = XLSX.utils.json_to_sheet(logRows);
+            XLSX.utils.book_append_sheet(wb, wsLog, "Complete Telemetry Log");
+
+            XLSX.writeFile(wb, `UOS_Weather_Report_${currentInterval}_${start}_to_${end}.xlsx`);
+        }
+
+        function exportComparisonExcel() {
+            if (compResults.length === 0) {
+                alert("Please run a comparison first before exporting.");
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+            const isThree = compResults.length === 3;
+
+            const matrixAoA = [
+                ["University of Sulaimani — Multi-Period Climatic Comparison Report"],
+                ["Developed by Hawber Ata — Department of Earth Sciences & Petroleum"],
+                [],
+                [
+                    "Parameter",
+                    `${compResults[0].label} (${compResults[0].start} to ${compResults[0].end})`,
+                    `${compResults[1].label} (${compResults[1].start} to ${compResults[1].end})`,
+                    ...(isThree ? [`${compResults[2].label} (${compResults[2].start} to ${compResults[2].end})`] : []),
+                    "Delta (Period 1 - Period 2)"
+                ]
+            ];
+
+            const metrics = [
+                ["Average Temperature (°C)", "tempAvg"],
+                ["Maximum Temperature (°C)", "tempMax"],
+                ["Minimum Temperature (°C)", "tempMin"],
+                ["Mean Dew Point (°C)", "dewAvg"],
+                ["Mean Humidity (%)", "humAvg"],
+                ["Total Precipitation (mm)", "precipTotal"],
+                ["Max Precipitation Rate (mm/h)", "precipRateMax"],
+                ["Mean Wind Speed (km/h)", "windAvg"],
+                ["Max Wind Gust (km/h)", "windMaxGust"],
+                ["Mean Wind Direction (°)", "windDirAvg"],
+                ["Mean Pressure (hPa)", "pressAvg"],
+                ["Max UV Index", "uvMax"],
+                ["Peak Solar Radiation (W/m²)", "solarMax"]
+            ];
+
+            metrics.forEach(([label, prop]) => {
+                const v1 = compResults[0].stats[prop];
+                const v2 = compResults[1].stats[prop];
+                const v3 = isThree ? compResults[2].stats[prop] : null;
+                const delta = (v1 !== null && v2 !== null) ? Number((v1 - v2).toFixed(2)) : "";
+                matrixAoA.push([
+                    label,
+                    v1,
+                    v2,
+                    ...(isThree ? [v3] : []),
+                    delta
+                ]);
+            });
+
+            const wsMatrix = XLSX.utils.aoa_to_sheet(matrixAoA);
+            XLSX.utils.book_append_sheet(wb, wsMatrix, "Comparison Matrix");
+
+            compResults.forEach((p, idx) => {
+                const sheetName = `P${idx + 1}_${p.label.replace(/[^a-zA-Z0-9]/g, "_")}`.slice(0, 28);
+                const rows = p.stats.series.map(r => ({
+                    "Interval Timestamp": r.timeLocal,
+                    "Temp Avg (°C)": r.temp,
+                    "Temp Max (°C)": r.tempHigh,
+                    "Temp Min (°C)": r.tempLow,
+                    "Precip (mm)": r.precipTotal,
+                    "Precip Rate (mm/h)": r.precipRate,
+                    "Humidity (%)": r.humidity,
+                    "Dew Point (°C)": r.dewpt,
+                    "Wind Speed (km/h)": r.windSpeed,
+                    "Wind Gust (km/h)": r.windGust,
+                    "Wind Dir (°)": r.winddir,
+                    "Pressure (hPa)": r.pressure,
+                    "UV Index": r.uv,
+                    "Solar Radiation (W/m²)": r.solarRadiation
+                }));
+                const ws = XLSX.utils.json_to_sheet(rows);
+                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+            });
+
+            XLSX.writeFile(wb, `UOS_Climatic_Comparison_${compResults.map(p => p.label).join("_vs_")}.xlsx`);
+        }
+
+        function exportToCSV() {
+            if (globalDataset.length === 0) {
+                alert("No weather data loaded to export.");
+                return;
+            }
+            const headers = ["Timestamp", "Station_ID", "Station_Name", "Temp_Avg_C", "Temp_High_C", "Temp_Low_C", "DewPoint_C", "Humidity_Pct", "Precip_Interval_mm", "Precip_Rate_mmhr", "Wind_Speed_kmh", "Wind_Gust_kmh", "Wind_Dir_Deg", "Pressure_hPa", "UV_Index", "Solar_Wm2"];
+            const rows = globalDataset.map(r => [
+                r.timeLocal, r.stationId, `"${r.stationName}"`, r.temp ?? "", r.tempHigh ?? "", r.tempLow ?? "",
+                r.dewpt ?? "", r.humidity ?? "", r.precipTotal ?? 0, r.precipRate ?? 0,
+                r.windSpeed ?? "", r.windGust ?? "", r.winddir ?? "", r.pressure ?? "", r.uv ?? "", r.solarRadiation ?? ""
+            ]);
+            const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            const start = document.getElementById("startDate").value;
+            const end = document.getElementById("endDate").value;
+            link.setAttribute("download", `UOS_Weather_${currentInterval}_${start}_to_${end}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
