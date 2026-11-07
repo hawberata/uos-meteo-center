@@ -2164,7 +2164,6 @@
                 rawRecords: records
             };
         }
-
         async function runComparisonAnalysis() {
             const count = parseInt(document.getElementById("compCountSelect").value, 10);
             const selectedSt = document.getElementById("compStationSelect").value;
@@ -2391,7 +2390,6 @@
                 const sVals = p.stats.series.map(x => x[param]).filter(v => v !== null && !isNaN(v));
                 const sMax = sVals.length ? Math.max(...sVals).toFixed(1) : "--";
                 const sMin = sVals.length ? Math.min(...sVals).toFixed(1) : "--";
-                const sSum = sVals.length ? sVals.reduce((a, b) => a + b, 0).toFixed(1) : "0.0";
 
                 const summaryTxt = param === "precipTotal"
                     ? `Total: ${p.stats.precipTotal} mm | Max: ${sMax} mm`
@@ -2726,12 +2724,25 @@
         }
 
         // Helper: Build Dashboard Parameter Summary Rows filtered by user's checklist
-        function buildDashboardSummaryRowsFiltered(records, tableParamsSet) {
+        // Automatically divides total precipitation by the number of active stations when isMultiStationMean = true
+        function buildDashboardSummaryRowsFiltered(records, tableParamsSet, isMultiStationMean = false) {
             const valid = (p) => records.map(d => d[p]).filter(v => v !== null && !isNaN(v));
             const mean = (arr) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : "--";
             const max = (arr) => arr.length ? Math.max(...arr).toFixed(2) : "--";
             const min = (arr) => arr.length ? Math.min(...arr).toFixed(2) : "--";
-            const sum = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0).toFixed(2) : "0.00";
+
+            // Count active stations in the passed records and compute station precipitation totals
+            const stationTotals = {};
+            records.forEach(r => {
+                if (!stationTotals[r.stationId]) stationTotals[r.stationId] = 0;
+                stationTotals[r.stationId] += (Number(r.precipTotal) || 0);
+            });
+            const activeStCount = Object.keys(stationTotals).length || 1;
+            const rawPrecipSum = Object.values(stationTotals).reduce((a, b) => a + b, 0);
+
+            const precipTotalFormatted = (isMultiStationMean && activeStCount > 1)
+                ? `${(rawPrecipSum / activeStCount).toFixed(2)} mm (Areal Mean)`
+                : `${rawPrecipSum.toFixed(2)} mm`;
 
             const rows = [];
             if (tableParamsSet.has("temp")) {
@@ -2744,7 +2755,7 @@
                 rows.push(["Relative Humidity (%)", min(valid("humidity")), mean(valid("humidity")), max(valid("humidity")), "--"]);
             }
             if (tableParamsSet.has("precipTotal")) {
-                rows.push(["Interval Precipitation (mm)", min(valid("precipTotal")), mean(valid("precipTotal")), max(valid("precipTotal")), `${sum(valid("precipTotal"))} mm`]);
+                rows.push(["Interval Precipitation (mm)", min(valid("precipTotal")), mean(valid("precipTotal")), max(valid("precipTotal")), precipTotalFormatted]);
             }
             if (tableParamsSet.has("precipRate")) {
                 rows.push(["Precipitation Rate (mm/hr)", min(valid("precipRate")), mean(valid("precipRate")), max(valid("precipRate")), "--"]);
@@ -2771,17 +2782,20 @@
         function appendDashboardStationSummaryTables(doc, startY, cfg) {
             let currentY = startY;
             const selected = document.getElementById("stationSelect").value;
+            const activeStIds = [...new Set(globalDataset.map(r => r.stationId))];
+            const activeCount = activeStIds.length || 1;
+            const isMultiStation = (selected === "ALL" || activeCount > 1);
 
-            if (selected === "ALL" && cfg.separateStations) {
-                // Overall Areal Summary first, then each individual station
-                const arealRows = buildDashboardSummaryRowsFiltered(globalDataset, cfg.tableParams);
+            if (isMultiStation && cfg.separateStations) {
+                // 1. Overall Areal Network Summary first (divides precipitation total by active station count)
+                const arealRows = buildDashboardSummaryRowsFiltered(globalDataset, cfg.tableParams, true);
                 doc.setFontSize(10.5);
                 doc.setTextColor(30, 58, 138);
-                doc.text(`1. Network-Wide Executive Summary (${STATIONS.length} Stations Combined)`, 14, currentY);
+                doc.text(`1. Network-Wide Executive Summary (${activeCount} Stations Areal Mean)`, 14, currentY);
 
                 doc.autoTable({
                     startY: currentY + 2.5,
-                    head: [["Meteorological Parameter", "Minimum", "Mean / Avg", "Maximum", "Cumulative Total"]],
+                    head: [["Meteorological Parameter", "Minimum", "Mean / Avg", "Maximum", `Areal Mean Total (÷ ${activeCount} Stns)`]],
                     body: arealRows,
                     theme: 'grid',
                     styles: { fontSize: 8, cellPadding: 2 },
@@ -2789,6 +2803,7 @@
                     margin: { left: 14, right: 14 }
                 });
 
+                // 2. Individual Station Summaries below (each showing its own Station Total)
                 STATIONS.forEach((st, idx) => {
                     const stRecords = globalDataset.filter(r => r.stationId === st.id);
                     if (stRecords.length === 0) return;
@@ -2804,7 +2819,7 @@
                     doc.autoTable({
                         startY: yPos + 2.5,
                         head: [["Parameter", "Minimum", "Mean / Avg", "Maximum", "Station Total"]],
-                        body: buildDashboardSummaryRowsFiltered(stRecords, cfg.tableParams),
+                        body: buildDashboardSummaryRowsFiltered(stRecords, cfg.tableParams, false),
                         theme: 'grid',
                         styles: { fontSize: 7.5, cellPadding: 1.8 },
                         headStyles: { fillColor: [51, 65, 85], textColor: 255, fontStyle: 'bold' },
@@ -2812,14 +2827,24 @@
                     });
                 });
             } else {
-                const stRows = buildDashboardSummaryRowsFiltered(globalDataset, cfg.tableParams);
+                const stRows = buildDashboardSummaryRowsFiltered(globalDataset, cfg.tableParams, isMultiStation);
+                const totalColHeader = isMultiStation
+                    ? `Areal Mean Total (÷ ${activeCount} Stns)`
+                    : "Station Total";
+
                 doc.setFontSize(10.5);
                 doc.setTextColor(30, 58, 138);
-                doc.text("1. Executive Parameter Summary Table (Min / Mean / Max / Total)", 14, currentY);
+                doc.text(
+                    isMultiStation
+                        ? `1. Network-Wide Executive Summary (${activeCount} Stations Areal Mean)`
+                        : "1. Executive Parameter Summary Table (Min / Mean / Max / Total)",
+                    14,
+                    currentY
+                );
 
                 doc.autoTable({
                     startY: currentY + 2.5,
-                    head: [["Meteorological Parameter", "Minimum", "Mean / Average", "Maximum", "Cumulative Total"]],
+                    head: [["Meteorological Parameter", "Minimum", "Mean / Average", "Maximum", totalColHeader]],
                     body: stRows,
                     theme: 'grid',
                     styles: { fontSize: 8, cellPadding: 2 },
@@ -3006,7 +3031,6 @@
             try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-                const pageW = doc.internal.pageSize.getWidth();
 
                 const selectedStation = document.getElementById("stationSelect").value;
                 const stName = document.getElementById("meta-name")?.textContent || "Sulaimani Network";
@@ -3049,10 +3073,16 @@
 
                     if (selectedStation === "ALL") {
                         labels = [...new Set(globalDataset.map(d => d.timeLocal))].sort();
+                        let sumAllPrecip = 0;
+                        let activeStCount = 0;
+
                         STATIONS.forEach(st => {
                             const stData = globalDataset.filter(d => d.stationId === st.id);
                             if (!stData.length) return;
+                            activeStCount++;
                             const stStats = calcStats(stData, param);
+                            sumAllPrecip += parseFloat(stStats.sum);
+
                             const mapObj = {};
                             stData.forEach(d => mapObj[d.timeLocal] = d[param]);
                             datasets.push({
@@ -3071,6 +3101,14 @@
                                     : `${st.name}: H:${stStats.max} L:${stStats.min}`
                             });
                         });
+
+                        if (param === "precipTotal" && activeStCount > 0) {
+                            const arealMean = (sumAllPrecip / activeStCount).toFixed(2);
+                            statsLines.unshift({
+                                color: "#2563eb",
+                                text: `Areal Mean: ${arealMean}mm`
+                            });
+                        }
                     } else {
                         labels = globalDataset.map(d => d.timeLocal);
                         const st = STATIONS.find(s => s.id === selectedStation) || STATIONS[0];
@@ -3339,9 +3377,11 @@
                 ["Station ID", "Station Name", "Intervals", "Mean Temp (°C)", "Max Temp (°C)", "Min Temp (°C)", "Mean Dew Point (°C)", "Mean Humidity (%)", "Total Precip (mm)", "Max Precip Rate (mm/h)", "Mean Wind (km/h)", "Max Gust (km/h)", "Mean Pressure (hPa)", "Max UV", "Peak Solar (W/m²)"]
             ];
 
+            let activeStCount = 0;
             STATIONS.forEach(st => {
                 const recs = globalDataset.filter(r => r.stationId === st.id);
                 if (recs.length === 0) return;
+                activeStCount++;
                 const s = computePeriodSummary(recs, false);
                 summaryRows.push([
                     st.id, st.name, s.count, s.tempAvg, s.tempMax, s.tempMin, s.dewAvg,
@@ -3349,6 +3389,18 @@
                     s.pressAvg, s.uvMax, s.solarMax
                 ]);
             });
+
+            if (activeStCount > 1) {
+                const arealStats = computePeriodSummary(globalDataset, true);
+                summaryRows.push([]);
+                summaryRows.push([
+                    "AREAL_MEAN", `Network Areal Mean (${activeStCount} Stations)`, arealStats.count,
+                    arealStats.tempAvg, arealStats.tempMax, arealStats.tempMin, arealStats.dewAvg,
+                    arealStats.humAvg, arealStats.precipTotal, arealStats.precipRateMax,
+                    arealStats.windAvg, arealStats.windMaxGust, arealStats.pressAvg,
+                    arealStats.uvMax, arealStats.solarMax
+                ]);
+            }
 
             const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
             XLSX.utils.book_append_sheet(wb, wsSummary, "Executive Summary");
